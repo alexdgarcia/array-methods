@@ -1,0 +1,180 @@
+<script src="../simpleTest.js"></script>
+<script>
+// Notes: 
+	//The slice method returns a shallow copy of a portion of an array into a new array object, selected from BEGIN to END (END not included). The original array will not be modified.
+
+	// Parameters:
+		// Array to perform slice on.
+		// BEGIN (optional); Index at which to begin slicing.
+			// If negative BEGIN, offset is from the end of the array.
+			// If BEGIN is not provided, slice begins from index 0.
+			// If BEGIN is greater than the length of the sequence, an empty array is returned.
+		// END (optional); Index before which to end extraction. slice() extracts UP TO but not including END.
+			// If negative END, offset is from the end of the array.
+			// If no END, slice extracts through the end of the sequence (arr.length).
+			// If END is greater than the length of the sequence, slice() extracts through to the end of the sequence.
+
+	// Return Value:
+		// A new array containing the extracted elements.
+
+	// Prototype:
+	function slice(array, begin, end) {
+		var sliceArray = [];
+		var startingIndex = 0;
+		var length = array.length;
+		var counter = 0;
+
+		if (!Array.isArray(array)) {
+			throw new TypeError(array + " is not an array.");
+		}
+
+		if (typeof begin === "number") {
+			if (begin < 0) {
+				startingIndex = length + begin;
+			} else {
+				startingIndex = begin;
+			}
+		}
+
+		if (typeof end === "number") {
+			if (end < 0) {
+				length = length + end;
+			} else if (end > length) {
+				length = length;
+			} else {
+				length = end;
+			}
+		}
+
+		for (let i = startingIndex; i < length; i++) {
+			// this is the only way to get "empty" for indexes with holes, instead of "undefined".
+			if (i in array) {
+				sliceArray[counter] = array[i];
+			}
+
+			counter++;
+		}
+
+		return sliceArray;
+	}
+
+	// Requirements:
+tests({
+	// It should only accept an array as the first argument.
+	'It should only accept an array as the first argument.': function() {
+		//fail();
+		var isTypeError = false;
+
+		try {
+			slice("string");
+		} catch(e) {
+			isTypeError = e instanceof TypeError;
+		}
+
+		eq(true, isTypeError);
+	},
+	// It should return an array that is different from the array passed in.
+	'It should return an array that is different from the array passed in.': function() {
+		//fail();
+		var testArray = [1, 2, 3];
+		var sliceArray = slice(testArray);
+		eq(true, sliceArray !== testArray);
+	},
+	// If begin, return an array with elements between begin and array.length - 1.
+	'If begin, return an array with elements between begin and array.length - 1.': function() {
+		//fail();
+		var testArray = [1, 2, 2];
+		var sliceArray = slice(testArray, 1);
+		eq(2, sliceArray.length);
+		sliceArray.forEach(function(el, index) {
+			eq(el, testArray[index + 1]);
+		});
+	},
+	// If no begin, return an array with elements between 0 and array.length - 1.
+	'If no begin, return an array with elements between 0 and array.length - 1.': function() {
+		//fail();
+		var testArray = [1, 1, 1];
+		var sliceArray = slice(testArray);
+		eq(3, sliceArray.length);
+		testArray.forEach(function(el, index) {
+			eq(el, sliceArray[index]);
+		});
+	},
+	// If negative begin, offset is from the end of the array.
+	'If negative begin, offset is from the end of the array.': function() {
+		//fail();
+		var testArray = [1, 2, 3];
+		var sliceArray = slice(testArray, -2);
+		eq(2, sliceArray.length);
+		eq(2, sliceArray[0]);
+		eq(3, sliceArray[1]);
+	},
+	// If begin > array.length - 1, return an empty array.
+	'If begin > array.length - 1, return an empty array.': function() {
+		//fail();
+		var testArray = [1, 2, 3];
+		var sliceArray = slice(testArray, 3);
+		eq(true, Array.isArray(sliceArray) && sliceArray.length === 0);
+	},
+	// If end, return an array up to but not including end.
+	'If end, return an array up to but not including end.': function() {
+		//fail();
+		var testArray = [1, 2, 3, 4, 5, 6, 7];
+		var sliceArray = slice(testArray, 0, 4);
+		eq(4, sliceArray.length);
+		sliceArray.forEach(function(el, index) {
+			eq(el, testArray[index]);
+		});
+	},
+	// If negative end, the offset is from the end of the array.
+	'If negative end, the offset is from the end of the array.': function() {
+		//fail();
+		var testArray = [1, 2, 3, 4, 5, 6, 7];
+		var sliceArray = slice(testArray, 0, -3);
+		eq(4, sliceArray.length);
+		sliceArray.forEach(function(el, index) {
+			eq(el, testArray[index]);
+		});
+	},
+	// If no end, end runs up to array.length.
+	'If no end, end runs up to array.length.': function() {
+		//fail();
+		var testArray = [1, 2, 3];
+		var sliceArray = slice(testArray, 0);
+		eq(3, sliceArray.length);
+		sliceArray.forEach(function(el, index) {
+			eq(el, testArray[index]);
+		});
+	},
+	// If end is greater than the length of the sequence, end runs up to array.length.
+	'If end is greater than the length of the sequence, end runs up to array.length.': function() {
+		//fail();
+		// Refactor how this is handle in the actual function if you can think of a better way to handle the IF logic.
+		var testArray = [1, 2, 3];
+		//debugger;
+		var sliceArray = slice(testArray, 0, 99);
+		eq(3, sliceArray.length);
+	},
+	// If end and begin, return an array with elements between those two indexes not including end.
+	'If end and begin, return an array between those two indexes not including end.': function() {
+		//fail();
+		var testArray = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+	//debugger;
+		var sliceArray = slice(testArray, 2, 7);
+		eq(5, sliceArray.length);
+		sliceArray.forEach(function(el, index) {
+			eq(el, testArray[index + 2]);
+		});
+	},
+	// It should include holes.
+	'It should include holes.': function() {
+		//fail();
+		var testArray = [1, 2, 3, , , , 4];
+		var sliceArray = slice(testArray, 0);
+		eq(7, sliceArray.length);
+		eq(false, 3 in sliceArray);
+		eq(false, 4 in sliceArray);
+		eq(false, 5 in sliceArray);
+	},
+});
+</script>

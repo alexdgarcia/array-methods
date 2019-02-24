@@ -1,0 +1,25 @@
+<!-- this file is our unit test library: -->
+<script src="../tinytest.js"></script>
+<!-- this file is where our JS and t/ functions we are testing can be found -->
+<script src="adder.js"></script>
+<!-- The below script tags contain the actuals tests we will be performing -->
+<script>
+// we "feed" our tests into the tinytest.js library by calling this tests function:
+tests({ // we pass in an object as an argument to the tests function
+   
+  // this objects has two properties, which are really methods of this object:
+  'adds numbers': function() { // 'adds numbers' is the key, the value of the key is a function. This function runs our tests
+
+    // there is a function inside tiny test called "eq" and it determines if 2 things equal each other: the 1st arg compared to t/ 2nd arg.
+    eq(6, add(2, 4)); // t/ JS f(x) we are testing is called add, and it can be found in the adder.js file.
+    eq(6.6, add(2.6, 4));
+  },
+
+  // If these values evaluate succesfully, the test will pass, otherwise it will fail.
+  'subtracts numbers': function() {
+  	// the value on the left is what we expect the function on the right (the 2nd arg) to evaluate to:
+    eq(-2, add(2, -4));
+  },
+
+});
+</script>

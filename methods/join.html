@@ -1,0 +1,163 @@
+<script src="../simpleTest.js"></script>
+<script>
+// Notes:
+	// T/ join() method creates and returns a new string by concatenating all of the elements in an array (or an array-like obj), separated by commas or a specified separator string.
+	 //** If array only has one item, then that item will be returned witout using the separator.
+
+	 // Parameters:
+	 	// separator (optional): Specifies a string to separate each pair of adjacent elements of the array. The separator is converted to a string if necessary. If omitted, the array elements are separated with a comma (","). If seperator is an empty string, all elements are joined w/o any charachters in between them.
+
+	 // Return value:
+	 	// A string will all array elements joined. If arr.length is 0, the empty string is returned.
+
+	 // Requirements:
+	 	// It should only accept an array as the first argument.
+	 	// It should accept a separator as the second argument.
+	 	// It should return an array.
+	 	// If array elements are not numbers, convert to numbers.
+	 	// If ith element === undefined, convert to empty string.
+	 	// If ith element === null, convert to empty string.
+	 	// If array.length === 0, return an empty string.
+	 	// If array.length === 1, return the lone item.
+	 	// If separator, it is used to separate array elements.
+	 	// The last element should not be followed by a separator.
+	 	// If separator is omitted, array elements should by separated by commas.
+	 	// If separator is not a string, convert to string.
+
+function join(array, separator) {
+	var joinStr = "";
+	var joinArray = array.slice(0);
+
+	if (!Array.isArray(array)) {
+		throw new TypeError(array + " is not an array.");
+	}
+
+	if (arguments.length === 1 || separator === undefined) {
+		separator = ",";
+	} else {
+		// Concatenating a number to a string will convert the number to a string.
+		separator = "" + separator;
+	}
+
+	for (var i = 0; i < joinArray.length; i++) {
+		if (joinArray[i] === undefined || joinArray[i] === null) {
+			joinArray[i] = "";
+		}
+
+		joinStr += (i === joinArray.length - 1) ? joinArray[i] : joinArray[i] + separator;
+		
+	}
+
+	return joinStr;
+}
+
+tests({
+	// It should only accept an array as the first argument.
+	'It should only accept an array as the first argument.': function() {
+		//fail();
+		var isTypeError = false;
+
+		try {
+			var result = join("string");
+		} catch(e) {
+			isTypeError = e instanceof TypeError;
+		}
+
+		eq(true, isTypeError);
+	},
+ 	// It should return a string.
+ 	'It should return a string.': function() {
+ 		var result = join([1, 2, 3]);
+
+ 		// You can use the typeof operator to return a string indicatinf the type of the operand.
+ 		eq("string", typeof result);
+ 	},
+ 	// If separator, last element in array should be concatenated without trailing separator.
+ 	'If separator, last element in array should be concatenated without trailing separator.': function() {
+ 		//fail();
+ 		var result = join([1, 2, 3], ",");
+
+ 		eq("1,2,3", result);
+ 	},
+ 	// If separator is omitted, array elements should by separated by commas.
+ 	'If separator is omitted, array elements should by separated by commas.': function() {
+ 		//fail();
+ 		var result = join([1,2,3]);
+
+ 		eq("1,2,3", result)
+ 	},
+ 	// If separator is not a string, convert to string.
+ 	'If separator is not a string, convert to string.': function() {
+ 		//fail();
+ 		var result = join([1,2,3], 777);
+
+ 		eq("177727773", result);
+ 	},
+ 	// If array elements are numbers, convert to strings.
+ 	'If array elements are numbers, convert to strings.': function() {
+ 		//fail();
+ 		var result = join([111, 222, 333, 444], "-");
+
+ 		eq("111-222-333-444", result); // This check is simple because the code is already performing string concatenation.
+ 	},
+ 	// If ith element === undefined, convert to empty string.
+ 	'If ith element === undefined, convert to empty string.': function() {
+ 		//fail();
+ 		var result1 = join([1, 2, undefined, 4]);
+ 		eq("1,2,,4", result1);
+
+ 		var result2 = join([undefined], "-");
+ 		eq("", result2);
+ 	},
+ 	// If ith element === null, convert to empty string.
+ 	'If ith element === null, convert to empty string.': function() {
+ 		//fail();
+ 		//debugger;
+ 		var result = join([1, 2, null, 4], "/");
+
+ 		eq("1/2//4", result);
+ 	},
+ 	// If array.length === 0, return an empty string.
+ 	'If array.length === 0, return an empty string.': function() {
+ 		//fail();
+ 		var result = join([], "abc");
+
+ 		eq("", result);
+ 	},
+ 	// If array.length === 1, return the lone item.
+ 	'If array.length === 1, return the lone item.': function() {
+ 		//fail();
+ 		var result = join([999], "-");
+
+ 		eq("999", result);
+ 	},
+ 	// It should not skip holes.
+ 	'It should not skip holes.': function() {
+ 		//fail();
+ 		var testArray = [1, 2, , , 3];
+ 		var result = join(testArray);
+
+ 		eq("1,2,,,3", result);
+ 	},
+ 	// The original array should remain unchanged.
+ 	'The original array should remain unchanged.': function() {
+ 		//fail();
+ 		var testArray = [1, 2, , , 3];
+ 		var result = join(testArray);
+
+ 		eq("1,2,,,3", result);
+ 		eq(JSON.stringify([1, 2, , , 3]), JSON.stringify(testArray));
+ 	},
+ 	// If separator === undefined, separate elements by commas.
+ 	'If separator === undefined, separate elements by commas.': function() {
+ 		//fail();
+ 		var result = join([1, 2, 3], undefined);
+ 		eq("1,2,3", result);
+ 	},
+ 	// If separator === null, convert null to a string and use it to separate elements.
+ 	'If separator === null, convert null to a string and use it to separate elements.': function() {
+ 		var result = join([1,2,3], null);
+ 		eq("1null2null3", result);
+ 	}
+});
+</script>

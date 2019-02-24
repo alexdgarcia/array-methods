@@ -1,0 +1,56 @@
+<script src="../tinytest.js"></script> <!-- path to the tinytest.js library, which provides the functionality for the testing below -->
+<script>
+
+// you first have to define the function you will be later calling in the tests object
+function forEach(array, callback, optionalThisObject) {
+  let forEachCallback = callback; // If we don't set this value to a var, it will not work when we later use bind if a this value is passed. When we use bind, a new function will be returned that will be bound to the optionalThisObject, but it's not going to modify the actuall callback being passed, it will be its own thing (so now there are 2 callback functions). 
+
+  //We need to use the original callback function whether a this is passed or not. If the optional this is not passed, we will use the callback regularly, though now it is stored in a var. If the this value IS passed, we will take our var and set it to the returned value of callback.bind(optionalThisObject). bind returns a copy of the callback (that's why there being two callbacks was mentioned above), this copy is bound to the optionalThisObject.
+  if (optionalThisObject) {
+    forEachCallback = callback.bind(optionalThisObject);
+  }
+
+  for (let i = 0; i < array.length; i++) {
+    forEachCallback(array[i], i, array);
+  }
+}
+
+tests({
+  'It should run the callback function array.length times.': function() { // within this test obj, you would add all code necessary to test your code. As you can see below, you can have vars, the actual function to test, and calls to the "eq" function.
+    let numberOfTimesCallbackHasRun = 0;
+
+    forEach([1, 2, 3], function() {
+      numberOfTimesCallbackHasRun++;
+    });
+
+    eq(numberOfTimesCallbackHasRun, 3);
+
+    //fail(); // you can force each test to fail if you don't have any code yet, using this fail function from the tinytest library
+  },
+  'It should pass in the ith element as the first argument to the callback.': function() {
+    //fail();
+    forEach([1], function(element) {
+      eq(1, element); // element is a var inside the callback function so we have to check its state here
+    })
+  },
+  'It should pass in the ith position as the second argument to the callback.': function() {
+    //fail();
+    forEach([1], function(element, index) {
+      eq(index, 0);
+    })
+  },
+  'It should pass in the original array as the third argument to the callback.': function() {
+    //fail();
+    const testArray = [1, 2, 3]; // to ensure that the functions reference the same array obj in memory, assign your array to a var
+    forEach(testArray, function(element, index, originalArray) {
+      eq(originalArray, testArray);
+    })
+  },
+  'It should accept and access an optional this object.': function() {
+    //fail();
+    forEach([1], function() {
+      eq(this.description, "I should be accessible inside of the callback");
+    }, {description: "I should be accessible inside of the callback"})
+  }
+});
+</script>

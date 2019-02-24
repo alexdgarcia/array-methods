@@ -1,0 +1,50 @@
+<script src="../tinytest.js"></script>
+<script>
+function forEach(array, callback, optionalThisObject) {
+	let callbackToUse = callback;
+
+	if (optionalThisObject) {
+		callbackToUse = callback.bind(optionalThisObject);
+	}
+
+	for (let i = 0; i < array.length; i++) {
+		callbackToUse(array[i], i, array);
+	}
+}
+
+tests({
+	'It should run the callback function array.length times': function() {
+		let numberOfTimesCallbackRuns = 0;
+		forEach([1, 2, 3, 4, 5], function() {
+			numberOfTimesCallbackRuns++;
+		});
+
+		eq(5, numberOfTimesCallbackRuns);
+	},
+	'It should provide the current value that is being processed in the array': function() {
+		//fail();
+		forEach([1], function(value) {
+			eq(1, value);
+		})
+	},
+	'It should provide the current index that is being iterated over': function() {
+		//fail();
+		forEach([1], function(value, index) {
+			eq(0, index);
+		})
+	},
+	'It should provide the original array that is passed to it as the third argument': function() {
+		//fail();
+		const arr = [1, 2, 69];
+		forEach(arr, function(value, index, returnedArr) {
+			eq(arr, returnedArr);
+		});
+	},
+	'It should accept and access an optional this object passed to it as a third argument': function () {
+		//fail();
+		forEach([1], function(value, index, returnedArr) {
+			eq("I am an optional object that can be returned if bound", this.description);
+		}, {description: "I am an optional object that can be returned if bound"})
+	}
+}); // tests go here
+</script>

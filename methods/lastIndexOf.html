@@ -1,0 +1,138 @@
+<script src="../simpleTest.js"></script>
+<script>
+// Notes:
+	// The lastIndexOf() method returns the last index at which a given element can be found in the array...
+	// or -1 if not present.
+	// The array is searched backwards, starting at fromIndex.
+
+	// Parameters
+		// Array to search.
+		// searchElement: element to locate in the array.
+		// fromIndex: the index at which to start searching backwards. Defaults to the array's length minus one.
+			// If the index is greater than or equal to the length of the array, the whole array is searched.
+			// If negative, it is taken as the offset from the end of the array. Note that when the index is negative, the array is still searched from front to back.
+
+	// Return value:
+		// The last index of the element in the array; -1 if not found.
+
+	// Requirements:
+		// It should throw a TypeError if first argument is not an array.
+		// It should return the last index where the searchElement is found.
+		// It should return -1 if the searchElement does not exist.
+		// If fromIndex, it should return searchElement's location from specified index.
+		// If negative fromIndex evaluates to zero, return -1.
+		// It should accept holes.
+
+	// Prototype:
+	// function lastIndexOf(array, searchElement, fromIndex) {
+	// 	for (var i = array.length - 1; i >= 0; i--) {
+	// 		if (array[i] === searchElement) {
+	// 			return i;
+	// 		}
+	// 	}
+
+	// 	return -1;
+	// }
+
+function lastIndexOf(array, searchElement, fromIndex) {
+	var startingIndex = array.length - 1;
+
+	if (!Array.isArray(array)) {
+		throw new TypeError(array + ' is not an array.');
+	}
+
+	if (arguments.length === 3) {
+		if (fromIndex < 0) {
+			startingIndex = array.length + fromIndex;
+		} else {
+			startingIndex = fromIndex;
+		}
+	}
+
+	for (var i = startingIndex; i >= 0; i--) {
+		if (array[i] === searchElement) {
+			return i;
+		}
+	}
+	
+	return -1;
+}
+
+tests({
+	// It should throw a TypeError if first argument is not an array.
+	'It should throw a TypeError if first argument is not an array.': function() {
+		//fail();
+		var isTypeError = false;
+		try {
+			var result = lastIndexOf("string", "r");
+		} catch(e) {
+			isTypeError = e instanceof TypeError;
+		}
+		eq(true, isTypeError);
+	},
+	// It should return the last index where the searchElement is found.
+	'It should return the last index where the searchElement is found.': function() {
+		//fail();
+		var testArray = [1, 1, 1];
+		var result = lastIndexOf(testArray, 1);
+		eq(2, result);
+	},
+	// It should return -1 if the searchElement does not exist.
+	'It should return -1 if the searchElement does not exist.': function() {
+		//fail();
+		var testArray = [1, 1, 1];
+		var result = lastIndexOf(testArray, 2);
+		eq(-1, result);
+	},
+	// If fromIndex, it should return searchElement's location from specified index.
+	'If fromIndex, it should return searchElement\'s location from specified index.': function() {
+		//fail();
+		var testArray = [1, 1, 1];
+		var result = lastIndexOf(testArray, 1, 1);
+		eq(1, result);
+	},
+	// If negative fromIndex, the offset is taken from the back of the array.
+	'If negative fromIndex, the offset is taken from the back of the array.': function() {
+		//fail();
+
+		// Test 1:
+		var testArray = [1, 2, 3, 4, 2, 5];
+		result1 = lastIndexOf(testArray, 2, -2);
+		eq(4, result1);
+
+		// Test 2:
+		var result2 = lastIndexOf(testArray, 2, -3);
+		eq(1, result2);
+	},
+	// If negative fromIndex evaluates to zero, return -1.
+	'If negative fromIndex evaluates to zero, return -1.': function() {
+		//fail();
+		var testArray = [1, 2, 3, 4, 2, 5];
+		result = lastIndexOf(testArray, 2, -6);
+		eq(-1, result);
+	},
+	// If no fromIndex, return -1.
+	'If no fromIndex, return -1.': function() {
+		//fail();
+
+		var testArray = [1, 2, 3];
+		var result = lastIndexOf(testArray);
+		eq(-1, result);
+	},
+	// It should accept holes.
+	'It should accept holes.': function() {
+		//fail();
+		var testArray = [1, 2, 3 , , , 4, , ,];
+		var result = lastIndexOf(testArray, 4);
+		eq(5, result);
+	},
+	// If an empty array is passed, it should return -1;
+	'If an empty array is passed, it should return -1;': function() {
+		//fail();
+
+		var testArray = [];
+		var result = lastIndexOf(testArray, 7);
+		eq(-1, result);
+	}
+});
+</script>

@@ -1,0 +1,77 @@
+<script src="../simpleTest.js"></script>
+<script>
+// Notes:
+	// The pop() method removes the LAST element from an array and returns that element.
+		// This method changes the length of the array.
+
+	// Syntax:
+		// array.pop();
+
+	// Return Value:
+		// the removed element from the array; undefined if the array is empty.
+
+	// Requirements:
+		// It should only accept arrays as the first argument.
+		// It should remove the last element from an array.
+		// It should return the removed element.
+		// If array.length === 0, return undefined.
+
+function pop(array) {
+	var lastElement = array[array.length - 1];
+
+	if ( !Array.isArray(array) ) {
+		throw new TypeError(array + " is not an array.")
+	}
+
+	delete array[array.length - 1]; // this will delete the value at this index, but the index itself will still exist as an empty index.
+
+	if (array.length > 0) {
+		array.length--; // This will remove the last item in the array, we can use this to handle our empty index.
+	}
+
+	return lastElement;
+}
+
+tests({
+		// It should only accept arrays as the first argument.
+		'It should only accept arrays as the first argument.': function() {
+			//fail();
+			var isTypeError = false;
+
+			try {
+				pop("string");
+			} catch(e) {
+				isTypeError = e instanceof TypeError;
+			}
+
+			eq(true, isTypeError);
+		},
+		// It should remove the last element from an array.
+		'It should remove the last element from an array.': function() {
+			//fail();
+			var testArray = [1, 2, 3, 4];
+			pop(testArray);
+
+			eq(3, testArray.length);
+			eq(false, 4 in testArray);
+			eq( JSON.stringify([1, 2, 3]), JSON.stringify(testArray) );
+		},
+		// It should return the removed element.
+		'It should return the removed element.': function() {
+			//fail();
+			var testArray = [1, 99];
+			var result = pop(testArray);
+
+			eq(99, result);
+			eq(1, testArray.length)
+		},
+		// If array.length === 0, return undefined.
+		'If array.length === 0, return undefined.': function() {
+			//fail();
+			var testArray = [];
+			var result = pop(testArray);
+
+			eq(undefined, result);
+		},
+});
+</script>

@@ -1,0 +1,189 @@
+<script src="../simpleTest.js"></script>
+<script>
+// Notes:
+	// The unshift() method adds one or more elements to the beginning of an array and returns the new length of the array.
+
+	// Parameters:
+		// elementN: The element(s) to add to the front of the array.
+
+	// Return value:
+		// The new length property of the object upon which the method was called.
+
+	// Requirements:
+		// It should accept only an array as the first argument.
+		// It should accept an element to add to the beginning of the array as the second argument.
+		// It should add strings to the beginning of the array.
+		// It should add objects to the beginning of the array.
+		// It should add other arrays to the beginning of the array.
+		// It should accept a variable number of arguments to be added to the begining of the aray.
+		// It should return the new length of the array.
+
+function unshift() {
+	var argsLength = arguments.length - 1;
+	var length = arguments[0].length - 1;
+	var threshhold;
+
+	if ( !Array.isArray(arguments[0]) ) {
+		throw new TypeError(arguments[0] + " is not an array.");
+	}
+
+	if (length === -1) {
+		threshhold = length;
+	} else {
+		threshhold = 0;
+	}
+
+	// No need to do the below. The original array that sits out side this function can be accessed and changed from within the function. You just have to target the specific indexes of the array and modify them.
+	// The work below i a little overkill. I refactored the code by iterating backwards through the array.
+
+	// for (var i = 0; i < arguments[0].length; i++) {
+	// 	unshiftArray[i] = arguments[0][i];
+	// }
+
+	// for (var i = 1; i < arguments.length; i++) {
+	// 	arguments[0][i - 1] = arguments[i];
+
+	// 	if (i === arguments.length - 1) {
+	// 		for (var j = 0; j < unshiftArray.length; j++) {
+	// 			arguments[0][i + j] = unshiftArray[j];
+	// 		}
+	// 	}
+	// }
+
+	for (var i = length; i >= threshhold; i--) {
+		arguments[0][i + argsLength] = arguments[0][i];
+
+		if (i === threshhold) {
+			for (var j = 0; j < argsLength; j++) {
+				arguments[0][j] = arguments[j + 1];
+			}
+		}
+	}
+
+	return arguments[0].length;
+}
+
+tests({
+	'It should accept only an array as the first argument.': function() {
+		//fail();
+		var isTypeError = false;
+
+		try {
+			unshift("string");
+		} catch(e) {
+			isTypeError = e instanceof TypeError;
+		}
+
+		eq(true, isTypeError);
+	},
+	// It should accept an element to add to the beginning of the array as the second argument.
+	'It should accept an element to add to the beginning of the array as the second argument.': function() {
+		//fail();
+		var testArray = [1, 2, 3, 4];
+
+		unshift(testArray, 5, 6);
+
+		eq(5, testArray[0]);
+		eq(6, testArray[1]);
+		eq(6, testArray.length);
+		eq( JSON.stringify([5, 6, 1, 2, 3, 4]), JSON.stringify(testArray) );
+	},
+	// It should add strings to the beginning of the array.
+	'It should add strings to the beginning of the array.': function() {
+		//fail();
+		var testArray = [1, 2, 3, 4];
+		var str = "string";
+
+		unshift(testArray, str);
+
+		eq("string", testArray[0]);
+		eq(5, testArray.length);
+		eq( JSON.stringify(["string", 1, 2, 3, 4]), JSON.stringify(testArray) );
+	},
+	// It should add objects to the beginning of the array.
+	'It should add objects to the beginning of the array.': function() {
+		//fail();
+		var testArray = [1, 2, 3, 4];
+		var obj = {name: 'alex', last: 'Garcia'};
+
+		unshift(testArray, obj);
+
+		eq(obj, testArray[0]);
+		eq(5, testArray.length);
+		eq( JSON.stringify([{name: 'alex', last: 'Garcia'}, 1, 2, 3, 4]), JSON.stringify(testArray) );
+	},
+	// It should add other arrays to the beginning of the array.
+	'It should add other arrays to the beginning of the array.': function() {
+		//fail();
+		var testArray1 = [1, 2, 3, 4];
+		var testArray2 = [5, 6];
+
+		unshift(testArray1, testArray2);
+
+		eq(testArray2, testArray1[0]);
+		eq(5, testArray1.length);
+		eq( JSON.stringify([[5, 6], 1, 2, 3, 4]), JSON.stringify(testArray1) );
+	},
+	// It should accept a variable number of arguments to be added to the begining of the aray.
+	'It should accept a variable number of arguments to be added to the begining of the aray.': function() {
+		//fail();
+		var testArray = [1, 2, 3, 4];
+		var obj = {name: 'alex', last: 'garcia'};
+		var testArray2 = [9, 99, 999];
+
+		unshift(testArray, 5, 6, obj, 7, testArray2, "string", 8);
+
+		eq(11, testArray.length);
+		eq(5, testArray[0]);
+		eq(6, testArray[1]);
+		eq(obj, testArray[2]);
+		eq(7, testArray[3]);
+		eq(testArray2, testArray[4]);
+		eq("string", testArray[5]);
+		eq(8, testArray[6]);
+		eq(1, testArray[7]);
+		eq(2, testArray[8]);
+		eq(3, testArray[9]);
+		eq(4, testArray[10]);
+		eq( JSON.stringify([5, 6, {name: 'alex', last: 'garcia'}, 7, [9, 99, 999], "string", 8, 1, 2, 3, 4]), JSON.stringify(testArray) );
+	},
+	// It should return the new length of the array.
+	'It should return the new length of the array.': function() {
+		//fail();
+		var testArray = [1, 2, 3];
+
+		var result = unshift([1, 2, 3], 1, 1, 1);
+
+		eq(6, result);
+	},
+	// If empty array, add elementN to the array and return new length.
+	'If empty array, add elementN to the array and return new length.': function() {
+		// Test 1:
+		var testArray1 = [];
+		var result = unshift(testArray1, 1, 2, 3);
+		eq(3, result);
+		eq(1, testArray1[0]);
+		eq(2, testArray1[1]);
+		eq(3, testArray1[2]);
+
+		// Test 2:
+		var testArray2 = [];
+		var result2 = unshift(testArray2, 1);
+		eq(1, result2);
+		eq(1, testArray2[0]);
+
+		// Test 3:
+		var testArray3 = [];
+		var obj = {name: 'alex', last: 'garcia'};
+		var result3 = unshift(testArray3, obj);
+		eq(1, result3);
+		eq(obj, testArray3[0]);
+
+		// Test 4:
+		var testArray4 = [];
+		var result4 = unshift(testArray4, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6);
+		eq(12, result4);
+		eq( JSON.stringify([1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6]), JSON.stringify(testArray4) );
+	}
+});
+</script>

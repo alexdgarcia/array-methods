@@ -1,0 +1,259 @@
+<script src="../tinytest.js"></script> <!-- path where our library can be found -->
+<script>
+
+// Notes:
+	// arguments.length is a built in method that will tell you how many args have been passed into the function
+	// Object.keys() will return an array of strings that represent all the enumerable properties of the given object, GIVEN an obj.
+	// e-nu-mer-a-ble: able to be counted by one-to-one correspondence with the set of all positive integers.
+	// instance of
+	// throw new TypeError()
+
+/* Prototype:
+	reduce(array, callback, initialValue) {
+		let resultSoFar = initialValue;
+
+		for (let i = 0; i < array.length; i++) {
+			resultSoFar = callback(resultSoFar, array[i], i, array);
+		}
+
+		return resultSoFar;
+	}
+*/
+
+/* Parameters to the callback: 
+	- accumulator
+	- currentValue
+	- currentIndex
+	- sourceArray
+
+*/
+
+function reduce(array, callback, initialValue) {
+	let startingIndex = 0;
+	let arrayOfNonEmptyElements = Object.keys(array); // if you use something enough, put it in a variable!
+	const length = array.length; // used this twice, SO THAT MEANS PUT IT IN A VAR! 
+	let accumulator = initialValue;
+
+	if (arguments.length < 3) {
+		// If array is empty, throw type error.
+		if (!arrayOfNonEmptyElements.length) { // since 0 is falsey, this is the same as saying length === 0.
+			// TypeError thrown when an operand or argument passed to a f(x) is incompatible with the type expected by that operator or f(x).
+			throw new TypeError("Reduce of empty array with no initial value"); // the new keyword creates an Error obj & the throw keyword throws (kinda like returns) the Error. 
+		}
+		// makes more sense to do this check first, than to first assign the accumulator and startIndex variables.
+		if (arrayOfNonEmptyElements.length === 1) {
+			const onlyElement = array[arrayOfNonEmptyElements[0]]
+			return onlyElement;
+		}
+
+		// If no initialValue, we want to skip any possible holes in the beginning of the array.
+		while (startingIndex in array === false && startingIndex < length) { // the length check ensures this while loop does not run forever (because of the first condition).
+			startingIndex++; // keep incrementing as long as there are holes in the front of the array.
+		}
+
+		accumulator = array[startingIndex];
+		startingIndex++;
+	} else {
+		if (arrayOfNonEmptyElements.length === 0) {
+			return accumulator;
+		}
+	}
+
+	for (let i = startingIndex; i < length; i++) {
+		// this conditional will skip any holes found in the middle of the array.
+		if (i in array) {
+			accumulator = callback(accumulator, array[i], i, array);
+		}
+	}
+
+	return accumulator;
+}
+
+// Testing:
+tests({ // DESCRIPTION: reduce() executes callback once for each element present in the array, exluding holes (holes are skipped).
+
+    // If initialValue, callback should run array.length times.
+    'If initialValue, callback should run array.length times.': function() {
+    	//fail();
+    	let numberOfTimesCallBackHasRun = 0;
+
+    	reduce([1, 2, 3], function() {
+    		numberOfTimesCallBackHasRun++;
+    	}, 0);
+
+    	eq(numberOfTimesCallBackHasRun, 3);
+    },
+    // If no initialValue, callback should run array.length - 1 times.
+    'If no initialValue, callback should run array.length - 1 times.': function() {
+    	//fail();
+    	let numberOfTimesCallBackHasRun = 0;
+
+    	reduce([1, 2, 3, 4], function() {
+    		numberOfTimesCallBackHasRun++;
+    	});
+
+    	eq(numberOfTimesCallBackHasRun, 3);
+    },
+
+    // If initialValue, accumulator begins at initial value.
+    'If initialValue, accumulator begins at initial value.': function() {
+    	//fail();
+    	const initialValueTest = 0;
+
+    	reduce([1], function(acc) {
+    		eq(acc, initialValueTest);
+    	}, initialValueTest);
+    },
+    // If no initialValue, accumulator === array[0].
+    'If no initialValue, accumulator === array[0].': function() {
+    	//fail();
+    	const arrayToReduce = [1]
+    	const initialValueTest = arrayToReduce[0];
+
+    	reduce(arrayToReduce, function(acc) {
+    		eq(acc, initialValueTest);
+    	});
+    },
+
+    // If initialValue, currentValue === array[0].
+    'If initialValue, currentValue === array[0].': function() {
+    	//fail();
+    	const arrayToReduce = [1];
+
+    	reduce(arrayToReduce, function(acc, currentValue) {
+    		eq(currentValue, arrayToReduce[0]);
+    	}, 0);
+    },
+    // If noInitialValue, currentValue === array[1].
+    'If noInitialValue, currentValue === array[1].': function() {
+    	//fail();
+    	const arrayToReduce = [1, 69];
+
+    	reduce(arrayToReduce, function(acc, currentValue) {
+    		eq(currentValue, arrayToReduce[1]);
+    	});
+    },
+
+	// If initialValue and array is empty, the initialValue is returned w/o invoking the callback.
+	'If initialValue and array is empty, the initialValue is returned w/o invoking the callback.': function() {
+		//fail();
+		const initialValueTest = 69;
+		let numberOfTimesCallBackHasRun = 0;
+
+		const intialValueReturned = reduce([,,,], function() {
+			numberOfTimesCallBackHasRun++;
+		}, initialValueTest);
+
+		eq(intialValueReturned, initialValueTest);
+		eq(numberOfTimesCallBackHasRun, 0);
+	},
+	// If no initialValue and the array has 1 element (regardless of position), the lone element is returned w/o invoking callback
+	'If no initialValue and the array has 1 element (regardless of position), the lone element is returned w/o invoking callback.': function() {
+		//fail();
+		let numberOfTimesCallBackHasRun = 0;
+
+		const loneElReturned = reduce([,,1,,,], function() {
+			numberOfTimesCallBackHasRun++;
+		});
+		eq(loneElReturned, 1);
+		eq(numberOfTimesCallBackHasRun, 0);
+	},
+
+	// It should accept an accumulator as the first argument to the callback.
+	'It should accept an accumulator as the first argument to the callback.': function() {
+		//fail();
+		reduce([33], function(acc) {
+			eq(acc, 0);
+		}, 0);
+	},
+	// It should accept the ith element as the second argument to the callback.
+	'It should accept the ith element as the second argument to the callback.': function() {
+		//fail();
+		reduce([33], function(acc, currentValue) {
+			eq(currentValue, 33);
+		}, 0);
+
+		reduce([33, 1], function(acc, currentValue) {
+			eq(currentValue, 1);
+		});
+	},
+	// It should accept the ith position as the third argument to the callback.
+	'It should accept the ith position as the third argument to the callback.': function() {
+		//fail();
+		reduce([69], function(acc, currentValue, currentIndex) {
+			eq(currentIndex, 0);
+		}, 0);
+
+		reduce([1, 2], function(acc, currentValue, currentIndex) {
+			eq(currentIndex, 1);
+		})
+	},
+	// It should accept the original array as the fourth argument to the callback.
+	'It should accept the original array as the fourth argument to the callback.': function() {
+		//fail();
+		const originalArray = [1, 69, 69];
+
+		reduce(originalArray, function(acc, currentValue, currentIndex, sourceArray) {
+			eq(sourceArray === originalArray, true);
+		}, 0);
+	},
+
+	// It should actually reduce.
+	'It should actually reduce.': function() {
+		//fail();
+		const reducedResult = reduce([1, 1, 1], function(acc, currentValue) {
+			return acc - currentValue;
+		}, 10);
+
+		eq(reducedResult, 7);
+	},
+	// If initial value, it should skip holes.
+	'If initialValue, it should skip holes.': function() {
+		//fail();
+		let numberOfTimesCallBackHasRun = 0;
+
+		const reducedResult = reduce([1,,,3], function(acc, currentValue) {
+			numberOfTimesCallBackHasRun++;
+			return acc + currentValue;
+		}, 0);
+
+		eq(reducedResult, 4);
+		eq(numberOfTimesCallBackHasRun, 2);
+	},
+	// If no initial value, it should skip holes in the beginning.
+	'If no initial value, it should skip holes in the beginning.': function() {
+		const reducedResult = reduce([,,, 1,,2], function(acc, currentValue) {
+			return acc + currentValue;
+		});
+
+		eq(reducedResult, 3);
+	},
+
+	// If no initialValue & array is empty, TypeError will be thrown.
+	'If no initialValue & array is empty, TypeError will be thrown.': function() {
+		//fail();
+		try {
+			reduce([,,,,], function() {});
+		} catch(e) {
+			eq(e instanceof TypeError, true); // instanceof is an operator that tests the presence of constructor.prototype in an object's prototype chain. Ess, the e object is an error itself, TypeError specifically, it thus has TypeError in its prototype chain.
+		}
+
+		try {
+			reduce([], function() {});
+		} catch(e) {
+			eq(e instanceof TypeError, true); // instanceof is a very good way to test if specific types of errors are thrown
+		}
+
+		// A BETTER WAY TO TEST THIS KIND OF THING: always assume false
+		let isTypeError = false;
+
+		try {
+			reduce([], function() {});
+		} catch(e) {
+			isTypeError = (e instanceof TypeError); 
+		}
+
+		eq(isTypeError, true);
+	}
+});
+</script>

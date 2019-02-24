@@ -1,0 +1,183 @@
+<script src="../simpleTest.js"></script>
+<script>
+// Notes:
+	// The fill method fills all the elements of an array from a start index to an end index with a static value.
+	// If the end index is not included, it will modify all the elements from the start index to the end of the array.
+
+	// Parameters:
+		// value: value to fill an array.
+		// start (optional): start index; defaults to zero.
+		// end (optional): end index, defaults to this.length.
+
+	// Return value:
+		// The modified array.
+
+	// It should accept arrays only as the first argument.
+	// If value, replace every element with value.
+	// If value is a number, replace every element with number.
+	// If value is an object, replace every element with that object.
+	// If value is a string, replace every element with that string.
+	// If value is an array, replace every element with that array.
+	// If start, replace every element with value from start up to but not including array.length.
+	// If start < 0, the offset is from the end of the array.
+	// If end, replace every element with value from start up to but not including end.
+	// If end < 0, the offset is from the end of the array.
+	// If array.length === 0, return an empty array.
+	// It should return the modified array.
+
+function fill(array, value, start, end) {
+	if ( !Array.isArray(array) ) {
+		throw new TypeError(array + " is not an array");
+	}
+
+	if (arguments.length === 2 || start === undefined) {
+		start = 0;
+	} else if (start < 0) {
+		start = start + array.length;
+	}
+
+	if (arguments.length === 3 || end === undefined) {
+		end = array.length;
+	} else if (end < 0) {
+		end = end + array.length;
+	}
+
+	for (var i = start; i < end; i++) {
+		array[i] = value;
+	}
+
+	return array;
+}
+
+tests({
+	// It should accept arrays only as the first argument.
+	'It should accept arrays only as the first argument.': function() {
+		//fail();
+		var isTypeError = false;
+
+		try {
+			var testArray = "string";
+			fill(testArray, 2);
+		} catch(e) {
+			isTypeError = e instanceof TypeError;
+		}
+
+		eq(true, isTypeError);
+	},
+	// If value, replace every element with value.
+	'If value, replace every element with value.': function() {
+		//fail();
+		var testArray = [1, 1, 1];
+
+		fill(testArray, 2);
+		eq( JSON.stringify([2, 2, 2]), JSON.stringify(testArray) );
+	},
+	// If value is a number, replace every element with number.
+	'If value is a number, replace every element with number.': function() {
+		//fail();
+		var testArray = [1, 1, 1];
+
+		fill(testArray, 0);
+		eq( JSON.stringify([0, 0, 0]), JSON.stringify(testArray) );
+	},
+	// If value is an object, replace every element with that object.
+	'If value is an object, replace every element with that object.': function() {
+		//fail();
+		var testArray = [1, 2, 3];
+		var obj = {name: 'alex', last: 'garcia'};
+		fill(testArray, obj);
+
+		eq( JSON.stringify([obj, obj, obj]), JSON.stringify(testArray) );
+	},
+	// If value is a string, replace every element with that string.
+	'If value is a string, replace every element with that string.': function() {
+		//fail();
+		var testArray = [1, 2, 3];
+		var str = "string";
+		fill(testArray, str);
+
+		eq( JSON.stringify([str, str, str]), JSON.stringify(testArray) );
+	},
+	// If value is an array, replace every element with that array.
+	'If value is an array, replace every element with that array.': function() {
+		//fail();
+		var testArray1 = [1, 2, 3];
+		var testArray2 = [4, 5, 6];
+		fill(testArray1, testArray2);
+
+		eq( JSON.stringify([testArray2, testArray2, testArray2]), JSON.stringify(testArray1) );
+	},
+	// If start, replace every element with value from start up to but not including array.length.
+	'If start, replace every element with value from start up to but not including array.length.': function() {
+		//fail();
+		var testArray = [1, 1, 1, 1];
+		fill(testArray, 0, 2);
+
+		eq( JSON.stringify([1, 1, 0, 0]), JSON.stringify(testArray) );
+	},
+	// If start < 0, the offset is from the end of the array.
+	'If start < 0, the offset is from the end of the array.': function() {
+		//fail();
+		var testArray = [1, 1, 1, 1];
+		fill(testArray, 0, -2);
+
+		eq( JSON.stringify([1, 1, 0, 0]), JSON.stringify(testArray) );
+	},
+	// If end, replace every element with value from start up to but not including end.
+	'If end, replace every element with value from start up to but not including end.': function() {
+		//fail();
+		var testArray = [1, 1, 1, 1];
+		fill(testArray, 0, 0, 3);
+
+		eq( JSON.stringify([0, 0, 0, 1]), JSON.stringify(testArray) );
+	},
+	// If end < 0, the offset is from the end of the array.
+	'If end < 0, the offset is from the end of the array.': function() {
+		//fail();
+		var testArray = [1, 1, 1, 1];
+		fill(testArray, 0, 0, -1);
+
+		eq( JSON.stringify([0, 0, 0, 1]), JSON.stringify(testArray) );
+	},
+	// If array.length === 0, return an empty array.
+	'If array.length === 0, return an empty array.': function() {
+		//fail();
+		var testArray = [];
+		var result = fill(testArray, 0);
+
+		eq(0, result.length);
+		eq( JSON.stringify([]), JSON.stringify(result) );
+	},
+	// It should return the modified array.
+	'It should return the modified array.': function() {
+		//fail();
+		var testArray = [1, 1, 1, 1];
+		var result = fill(testArray, 0, 2);
+
+		eq( JSON.stringify([1, 1, 0, 0]), JSON.stringify(result) );
+	},
+	// If end < start, do not modify the array.
+	'If end < start, do not modify the array.': function() {
+		//fail();
+		var testArray = [1, 1, 1, 1];
+		var result = fill(testArray, 0, 2, -4);
+
+		eq( JSON.stringify([1, 1, 1, 1]), JSON.stringify(result) );
+	},
+	// It should perform fill on holes.
+	'It should perform fill on holes.': function() {
+		//fail();
+		// Test 1:
+		var testArray = [1, 1, , , 1];
+		var result = fill(testArray, 0);
+
+		eq( JSON.stringify([0, 0, 0, 0, 0]), JSON.stringify(result) );
+
+		//Test 2:
+		var testArray2 = [1, 1, , , 1];
+		var result2 = fill(testArray2, 0, 3);
+		
+		eq( JSON.stringify([1, 1, , 0, 0]), JSON.stringify(result2) );
+	}
+});
+</script>

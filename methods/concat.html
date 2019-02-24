@@ -1,0 +1,184 @@
+<script src="../simpleTest.js"></script>
+<script>
+// Notes:
+	//The concat() method is used to merge two or more arrays. This method does not change the existing arrays, but instead returns a new array.
+
+	// Parameters:
+		// valueN (optional): Arrays and/or values to concatenate onto the new array. If value N is undefined, concat() returns a shallow copy of the array on which it was called.
+			// shallow vs deep copy; shallow references the original object memory address, whereas deep copy is a new memory allocation so if you change a property of the new object or a property of the original object, you do not change that property in the other (https://we-are.bookmyshow.com/understanding-deep-and-shallow-copy-in-javascript-13438bad941c)
+
+	// Return value:
+		// A new array instance.
+
+	// Requirements:
+		// It must accept a beginning array as the first argument to concat().
+		// It must accept a second argument to concatenate to the first argument.
+		// It must accept a variable number of arguments to concatenate to the first.
+		// It creates a shallow copy of arrays and array-like objects.
+		// It should concatenate numbers.
+		// It should concatenate strings.
+		// It should concatenate booleans.
+		// It should concatenate objects.
+		// If an empty array is provided as the first argument, it should return every subsequent argument concatenated.
+		// It should invoke the callback on indexes with holes.
+		// It should concatenate holes.
+
+	// Prototype:
+	// function concat(array1, array2) {
+	// 	var concatArray = array1;
+
+	// 	for(var i = 0; i < array2.length; i++) {
+	// 		concatArray.push(array2[i]);
+	// 	}
+
+	// 	return concatArray;
+	// }
+
+function concat(array1, ...options) {
+	var concatArray = [];
+
+	console.log(arguments.length);
+
+	// Must perform this check. If you pass a string as the first argument it will concatenate every character in the string individually. String obects have their own concat methods that handle this appropriately, we should only be focused on arrays.
+	if (!Array.isArray(array1)) {
+		throw new TypeError("The first argument to concat() must be an array");
+	}
+
+	for (var i = 0; i < array1.length; i++) {
+		concatArray.push(array1[i]);
+	}
+
+	if (arguments.length > 1) {
+		loop1: // label for the first for loop
+		for(var i = 0; i < options.length; i++) {
+			if ( Array.isArray(options[i]) ) {
+				for (var k = 0; k < options[i].length; k++) {
+					concatArray.push(options[i][k]);
+				}
+				continue loop1; // I was able to refactor and possibly improve the code using this continue + label statement.
+			}
+			concatArray.push(options[i]); // on the next iteration, if the argument is not an array, I can just push that element to concat.
+			/* Removed the code below: */
+			// } else {
+			// 	concatArray.push(options[i]);
+			// }
+		}
+	}
+
+	return concatArray;
+}
+
+tests({
+	// It must accept a beginning array as the first argument to concat().
+	'It must accept a beginning array as the first argument to concat().': function() {
+		//fail();
+		var testArray = [1, 2, 3]
+		
+		var concatArray = concat(testArray);
+		testArray.forEach(function(el, index) {
+			eq(el, concatArray[index]);
+		});
+	},
+	// It should only accept arrays as the first argument to concat().
+	'It should only accept arrays as the first argument to concat().': function() {
+		//fail();
+		var isTypeError = false;
+
+		try {
+			concat("string", [1, 2, 3]);	
+		} catch (e) {
+			isTypeError = e instanceof TypeError;
+		}
+
+		eq(true, isTypeError);
+	},
+	// It must accept a second argument to concatenate to the first argument.
+	'It must accept a second argument to concatenate to the first argument.': function() {
+		//fail();
+		var testArray = [1, 2, 3];
+		var concatArray = concat([], testArray);
+		testArray.forEach(function(el, index) {
+			eq(el, testArray[index]);
+		});
+	},
+	// It must accept a variable number of arguments to concatenate to the first.
+	'It must accept a variable number of arrays to concatenate to the first.': function() {
+		//fail();
+		var testArray = [1, 2, 3];
+		var concatArray = concat(testArray, [4, 5, 6], [7,8,9]);
+		[4, 5, 6].forEach(function(el, index) {
+			eq(el, concatArray[index + 3]);
+		});
+		[7, 8, 9].forEach(function(el, index) {
+			eq(el, concatArray[index + 6])
+		});
+	},
+	// It should not mutate the original array.
+	'It should not mutate the original array.': function() {
+		// fail();
+		var testArray = [1, 2, 3];
+		var result = concat(testArray, [4, 5, 6]);
+		eq(3, testArray.length);
+		eq(6, result.length);
+	},
+	// It should concatenate numbers.
+	'It should concatenate numbers.': function() {
+		//fail();
+		var four = 4;
+		var five = 5;
+		var result = concat([1, 2, 3], four, five);
+		eq(four, result[3]);
+		eq(five, result[4]);
+	},
+	// It should concatenate strings.
+	'It should concatenate strings.': function() {
+		//fail();
+		var comparisionArray = [1, 2, 3, "string"];
+		var concatArray = concat([1, 2, 3], "string");
+		comparisionArray.forEach(function(el, index) {
+			eq(el, concatArray[index]);
+		});
+	},
+	// It should concatenate booleans.
+	'It should concatenate booleans.': function() {
+		//fail();
+		var comparisionArray = [1, 2, 3, true, false];
+		var concatArray = concat([1, 2, 3], true, false);
+		comparisionArray.forEach(function(el, index) {
+			eq(el, concatArray[index]);
+		});
+	},
+	// It should concatenate objects.
+	'It should concatenate objects.': function() {
+		//fail();
+		var alex = {
+			name: "Alex",
+			occupation: "IT"
+		}
+		var comparisionArray = [1, 2, 3, alex];
+		var concatArray = concat([1, 2, 3], alex);
+		comparisionArray.forEach(function(el, index) {
+			eq(el, concatArray[index]);
+		});
+	},
+	// If an empty array is provided as the first argument, it should return every subsequent argument concatenated.
+	'If an empty array is provided as the first argument, it should return every subsequent argument concatenated.': function() {
+		//fail();
+		var comparisionArray = [1, 2, 3, 4, 5, 6];
+		var concatArray = concat([], [1, 2, 3], [4, 5, 6]);
+		comparisionArray.forEach(function(el, index) {
+			eq(el, concatArray[index]);
+		});
+	},
+	// It should concatenate holes.
+	'It should concatenate holes.': function() {
+		//fail();
+		var comparisionArray = [1, 2, 3, 4, , 5, , 6, , 7];
+		var concatArray = concat([1, 2, 3], [4, , 5, , 6, , 7]);
+		comparisionArray.forEach(function(el, index) {
+			eq(el, concatArray[index]);
+		});
+		eq(comparisionArray.length, concatArray.length);
+	}
+});
+</script>

@@ -1,0 +1,139 @@
+<!-- path to our simpleTest library -->
+<script src="../simpleTest.js"></script>
+
+<script>
+// Notes:
+	// findIndex() returns the index of the FIRST element in the array that satisfies the provided testing function. OTHERWISE, it returns -1, indicating no element passed the test.
+
+		// Takes a callback function which performs a test on each element of an arr, until it finds the first element that satisfies the function.
+			// the callback can take three args: currentElement, currentIndex, the array find was called upon
+		// if the element that makes the callback return true is found, that element's index is returned...
+		// if the callback never returns truthy, -1 is returned
+		// if the array's length is 0, -1 is returned
+		// takes an optional this value
+		// iterates over empty values as well/does not skip holes
+
+	//Prototype:
+		// findIndex(array, callback, optionalThis) {
+		// 	for (let i = 0; i < array.length; i++) {
+		// 		if (callback(array[i], i, array) === true) {
+		// 			return i;
+		// 		}
+		// 	}
+		// }
+
+function findIndex(array, callback, optionalThis) {
+	let findIndexCallback = callback;
+	let findIndexResult = -1;
+
+	if (optionalThis) {
+		findIndexCallback = findIndexCallback.bind(optionalThis);
+	}
+
+	// This is implicit based on how the rest of you code is set up, so no need for this:
+	// if (array.length === 0) {
+	// 	return findIndexResult;
+	// }
+
+	for (let i = 0; i < array.length; i++) {
+		if (findIndexCallback(array[i], i, array)) {
+			findIndexResult = i;
+			return findIndexResult;
+		}
+	}
+
+	return findIndexResult;
+}
+
+
+tests({
+	// It should run the callback array.length times.
+	'It should run the callback array.length times.': function() {
+		//fail();
+		let numOfTimesCallbackHasRun = 0;
+
+		findIndex([1, 2, 3], function() {
+			numOfTimesCallbackHasRun++;
+		});
+
+		eq(3, numOfTimesCallbackHasRun);
+	},
+	// It should accept the ith element as the first argument to the callback.
+	'It should accept the ith element as the first argument to the callback.': function() {
+		//fail();
+		findIndex([99], function(currElement) {
+			eq(99, currElement);
+		});
+	},
+	// It should accept the ith position as the second argument to the callback.
+	'It should accept the ith position as the second argument to the callback.': function() {
+		//fail();
+		findIndex([99], function(currElement, currIndex) {
+			eq(0, currIndex);
+		});
+	},
+	// It should accept the original array as the third argument to the callback.
+	'It should accept the original array as the third argument to the callback.': function() {
+		//fail();
+		const testArray = [1, 2, 3];
+
+		findIndex(testArray, function(currElement, currIndex, originalArray) {
+			eq(testArray, originalArray);
+		});
+	},
+	// It should accept an optional this value
+	'It should accept an optional this value.': function() {
+		//fail();
+		findIndex([1], function() {
+			eq('I am an optional this value.', this.description);
+		}, {description: 'I am an optional this value.'});
+	},
+	// If no optional this, undefined is used.
+	'If no optional this, undefined is used.': function() {
+		findIndex([1], function() {
+			eq(undefined, this.description);
+		})
+	},
+	// If the ith element makes the callback return true, the ith position should be returned.
+	'If the ith element makes the callback return true, the ith position should be returned.': function() {
+		//fail();
+		const findIndexResult = findIndex([1, 2, 69, 1], function(currElement) {
+			return currElement > 2;
+		});
+
+		eq(2, findIndexResult);
+	},
+	// If the callback never returns true, -1 is returned.
+	'If the callback never returns true, -1 is returned.': function() {
+		//fail();
+		const findIndexResult = findIndex([1, 2, 3, 4, 5], function(currElement) {
+			return currElement > 5;
+		});
+
+		eq(-1, findIndexResult);
+	},
+	// If the array's length is 0, -1 is returned.
+	'If the array\'s length is 0, -1 is returned.': function() {
+		//fail();
+		const findIndexResult = findIndex([], function() {});
+
+		eq(-1, findIndexResult);
+	},
+	// It should not skip holes.
+	'It should not skip holes.': function() {
+		//fail();
+		const findIndexResult = findIndex([1,2,,3], function(currElement) {
+			return currElement === undefined;
+		});
+
+		eq(2, findIndexResult);
+
+		const findIndexResult2 = findIndex([,,,,,], function(currElement) {
+			return currElement >= 0;
+		})
+
+		eq(-1, findIndexResult2);
+	}
+});
+
+</script>

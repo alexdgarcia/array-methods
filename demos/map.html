@@ -1,0 +1,101 @@
+<script src="../tinytest.js"></script> <!-- path where our library can be found -->
+<script>
+// Notes:
+	// using "0 in array" returns a boolean value, the number at the front represents the index of the array. If the specific index is empty, it returns false. 
+	// Can also be used for objects where the number represents an object property with a number as the property name. With objects you can also check for non-number properties by using a string: "one" in Person.
+	// This is important because map creates a new array by invoking the callback function on EVERY element of the original array. It maps one-to-one, i.e., if the first index is empty, it will map an empty space there. So you need to pay attention to indexes and their assigned values when recreating map();
+
+function map(array, callback, optionalThisObject) {
+	let mapCallback = callback;
+	const returnedArray = [];
+
+	if (optionalThisObject) {
+		mapCallback = callback.bind(optionalThisObject);
+	}
+
+	for (let i = 0; i < array.length; i++) {
+		if (i in array) {
+			returnedArray[i] = mapCallback(array[i], i, array);
+		}
+	}
+
+	return returnedArray;
+}
+
+tests({
+	'It should invoke the callback function array.length times.': function() {
+		//fail();
+		let timesCallbackHasRun = 0;
+
+		map([1, 2, 3, 4], function() {
+			timesCallbackHasRun++;
+		})
+
+		eq(timesCallbackHasRun, 4);
+	},
+	'It should accept the ith element being processed as an argument to the callback.': function() {
+		//fail();
+		map([1], function(currentValue) {
+			eq(currentValue, 1);
+		})
+	},
+	'It should accept the ith position as a second argument to the callback.': function() {
+		//fail();
+		map([4], function(currentValue, index) {
+			eq(index, 0);
+		})
+	},
+	'It should accept the original array as a third argument to the callback.': function() {
+		//fail();
+		const testArray = [1, 2, 69];
+
+		map(testArray, function(currentValue, index, originalArray) {
+			eq(testArray, originalArray);
+		})
+	},
+	'It should accept an optional this object as the third argument to map.': function() {
+		//fail();
+		map([1, 2, 77], function() {
+			eq(this.description, "I am an optional object. You can see me if this function is configured correctly");
+		}, {description: "I am an optional object. You can see me if this function is configured correctly"})
+	},
+	'It should return an array.': function() {
+		//fail();
+		const returnedArr = map([1, 2], function() {});
+
+		eq(Array.isArray(returnedArr), true);
+		eq(undefined, returnedArr[0]);
+		eq(undefined, returnedArr[1]);
+	},
+	'It should return an array that is different than the array it is called on': function() {
+		//fail();
+		const originalArray = [1, 2, 69];
+		const returnedArr = map(originalArray, function() {});
+
+		eq(originalArray !== returnedArr, true);
+	},
+	'It should return a mapped array.': function() {
+		//fail();
+		const returnedArray = map([1, 2, 3], function double(currentValue) {
+			return currentValue * 2;
+		});
+
+		eq(returnedArray[0], 2);
+		eq(returnedArray[1], 4);
+		eq(returnedArray[2], 6);
+	},
+	'It should map one-to-one, while not invoking the callback for empty indexes.': function() {
+		//fail();
+		const returnedArray = map([, 2, 3], function triple(currentValue) {
+			return currentValue * 3;
+		})
+
+		eq(returnedArray[1], 6); // DON'T FORGET. Logging is a tool to help you, as well as debugger.
+		eq(returnedArray[2], 9);
+		eq(0 in returnedArray, false); // this is a check that you MUST do for this scenario where the 0th element is empty. You want to ensure that the value at this position equals to false.
+
+		// if your array has undefined as one of its indexes, in an arithmetic expression this will always equal NaN.
+		// if you have an empty index, it is just undefined (but undefined because it is empty, not the same as the case above where the keyword undefined actually exists at that index).
+	}
+});
+</script>

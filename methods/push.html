@@ -1,0 +1,126 @@
+<script src="../simpleTest.js"></script>
+<script>
+// Notes:
+	// The push()) method adds one or more elements to the end of an array and returns the new length of the array.
+
+	// Parameters:
+		// elementN: The elementsto add to the end of the array.
+
+	//Return value:
+		// The new length property of the object upon which the method was called.
+
+	// Requirements:
+		// It should add the provided elementN as the second argument.
+		// If multiple elementN, it should add them all to the end of the array.
+		// It should return the new length of the array.
+		// If elementN is an array, it should be added as array to the end of the original array.	
+		// If no elementN, return array.length.
+		// If empty array, return the length after pushing elementN.
+		// If empty array && no elementN, return 0.
+
+function push(array, ...elements) {
+	if ( !Array.isArray(array) ) {
+		throw new TypeError(array + " is not an array.");
+	}
+
+	for (var i = 0; i < elements.length; i++) {
+		array[array.length] = elements[i];
+	}
+
+	return array.length;
+}
+
+tests({
+	// It should only accept arrays as the first argument.
+	'It should only accept arrays as the first argument.': function() {
+		//fail();
+		var isTypeError = false;
+
+		try {
+			push("string", "s");
+		} catch(e) {
+			isTypeError = e instanceof TypeError;
+		}
+
+		eq(true, isTypeError);
+	},
+	// It should add the provided elementN to the end of the array.
+	'It should add the provided elementN to the end of the array.': function() {
+		//fail();
+		var testArray = [1];
+		push(testArray, 2);
+		eq( JSON.stringify([1, 2]), JSON.stringify(testArray) );
+		eq(2, testArray.length);
+		eq(true, 1 in testArray);
+	},
+	// If multiple elementN, it should add them all to the end of the array.
+	'If multiple elementN, it should add them all to the end of the array.': function() {
+		//fail();
+		var testArray = [1];
+		push(testArray, 2, 3, 4);
+		eq( JSON.stringify([1, 2, 3, 4]), JSON.stringify(testArray) );
+		eq(4, testArray.length);
+	},
+	// It should return the new length of the array.
+	'It should return the new length of the array.': function() {
+		//fail();
+		var testArray = [1];
+		var result = push(testArray, 2);
+		eq(2, result);
+	},
+	// If elementN is an array, it should be added as array to the end of the original array.
+	'If elementN is an array, it should be added as array to the end of the original array.': function() {
+		//fail();
+		var testArray1 = ['pigs', 'cows'];
+		var testArray2 = ['cats', 'dogs'];
+		push(testArray1, testArray2);
+		eq( JSON.stringify(['pigs', 'cows', testArray2]), JSON.stringify(testArray1) );
+	},
+	// If elementN is an object, it should be added to the end of the array.
+	'If elementN is an object, it should be added to the end of the array.': function() {
+		//fail();
+		var testArray = [1, 2, 3];
+		var result = push(testArray, {this: 'I am an object'});
+		eq(4, result);
+		eq( JSON.stringify([1, 2, 3, {this: 'I am an object'}]), JSON.stringify(testArray) );
+	},
+	// If elementN === undefined, add undefined to the end of the array.
+	'If elementN === undefined, add undefined to the end of the array.': function() {
+		//fail();
+		var testArray = [1, 2, 3];
+		var result = push(testArray, undefined);
+		eq(4, result);
+		eq( JSON.stringify([1, 2, 3, undefined]), JSON.stringify(testArray) );
+	},
+	// If elementN === null, add null to the end of the array.
+	'If elementN === null, add null to the end of the array.': function() {
+		//fail();
+		var testArray = [1, 2, 3];
+		var result = push(testArray, null);
+		eq(4, result);
+		eq( JSON.stringify([1, 2, 3, null]), JSON.stringify(testArray) );	
+	},
+	// If no elementN, return array.length.
+	'If no elementN, return array.length.': function() {
+		//fail();
+		var testArray = [1, 1, 1, 1];
+		var result = push(testArray);
+		eq(4, result);
+	},
+	// If empty array, return the length after pushing elementN.
+	'If empty array, return the length after pushing elementN.': function() {
+		//fail();
+		var testArray = [];
+		var result = push(testArray, "strings", "also", "work");
+		eq(3, result);
+	},
+	// If empty array && no elementN, return 0.
+	'If empty array && no elementN, return 0.': function() {
+		//fail();
+		var testArray = [];
+		var result = (testArray);
+		eq(0, result);
+	},
+});
+
+</script>

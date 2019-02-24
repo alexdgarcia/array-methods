@@ -1,0 +1,121 @@
+<script src="../simpleTest.js"></script>
+<script>
+// Notes:
+	// The reverse() method reverses an array in place (the original array is changed). The first array element becomes the last, and the last array element becomes the first.
+
+	// Return value:
+		// The reversed array.
+
+	// Requirements:
+		// It should accept an array as the first argument.
+		// It should reverse the array that is passed to it.
+		// It should return an array.
+		// If array.length === 0, return an empty array.
+		// It should not skip holes.
+
+function reverse(array) {
+	var stopIndex = Math.floor(array.length / 2);
+	var element;
+	var counter = 0;
+
+	if ( !Array.isArray(array) ) {
+		throw new TypeError(array + " is not an array.");
+	}
+
+	for (var i = array.length - 1; i >= stopIndex; i--) {
+		for (var j = counter; j <= stopIndex; j++) {
+			element = array[j];
+			array[j] = array[i];
+			break;
+		}
+		counter++;
+		array[i] = element;
+	}
+
+	return array;
+}
+
+tests({
+		// It should accept an array as the first argument.
+		'It should accept an array as the first argument.': function() {
+			//fail();
+			var isTypeError = false;
+
+			try {
+				reverse("string");
+			} catch(e) {
+				isTypeError = e instanceof TypeError;
+			}
+
+			eq(true, isTypeError);
+		},
+		// It should reverse the array that is passed to it.
+		'It should reverse the array that is passed to it.': function() {
+			//fail();
+			// Test 1:
+			var testArray1 = [1, 2, 3];
+			reverse(testArray1);
+
+			eq( JSON.stringify([3, 2, 1]), JSON.stringify(testArray1) );
+
+			// Test 2:
+			var testArray2 = [1, 2, 3, 4, 5, 6, 7, 8];
+			reverse(testArray2);
+
+			eq( JSON.stringify([8, 7, 6, 5, 4, 3, 2, 1]), JSON.stringify(testArray2) );
+		},
+		// It should return an array.
+		'It should return an array.': function() {
+			//fail();
+			var testArray = [1, 2, 3, 4, 5];
+			var result = reverse(testArray);
+
+			eq(true, Array.isArray(result));
+			eq( JSON.stringify([5, 4, 3, 2, 1]), JSON.stringify(testArray) );
+		},
+		// If array.length === 0, return an empty array.
+		'If array.length === 0, return an empty array.': function() {
+			//fail();
+			var testArray = [];
+			var result = reverse(testArray);
+
+			eq( true, Array.isArray(result) );
+			eq(0, result.length);
+			eq( JSON.stringify([]), JSON.stringify(result) );
+		},
+		// It should not skip holes.
+		'It should not skip holes.': function() {
+			//fail();
+			var testArray = [1, 2, 3, 4, , , 5, 6];
+			var result = reverse(testArray);
+
+			eq( JSON.stringify([6, 5, , , 4, 3, 2, 1]), JSON.stringify(result) );
+		},
+		// It should reverse an array of strings.
+		'It should reverse an array of strings.': function() {
+			//fail();
+			var testArray = ["this", "is", "backwards"];
+			var result = reverse(testArray);
+
+			eq( JSON.stringify(["backwards", "is", "this"]), JSON.stringify(testArray) );
+		},
+		// It should reverse an array of objects.
+		'It should reverse an array of objects.': function() {
+			//fail();
+			var obj1 = {name: "this"};
+			var obj2 = {name: "is"};
+			var obj3 = {name: "backwards"};
+			var result = reverse([obj1, obj2, obj3]);
+
+			eq( JSON.stringify([obj3, obj2, obj1]), JSON.stringify(result) );
+		},
+		// It should reverse an array of arrays.
+		'It should reverse an array of arrays.': function() {
+			//fail();
+			var testArray = [[1, 2, 3], [4, 5, 6], [9, , 9]];
+			var result = reverse(testArray);
+
+			eq( JSON.stringify([[9, , 9], [4, 5, 6], [1, 2, 3]]), JSON.stringify(testArray) );
+		},
+});
+</script>

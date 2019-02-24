@@ -1,0 +1,94 @@
+<script src="../simpleTest.js"></script>
+<script>
+// Notes:
+	// The sort() method sorts the elements of an array in place and returns the array.
+	// The default sort order is built upon converting the elements into strings, then comparing their sequences of UTF-16 code units values.
+
+	// Parameters:
+		// compareFunction (optional): Specifies a function that define the sort order. If omitted, the array is sorted according to each character's Unicode code point value, according to the string conversion of each element.
+			// firstEl: the first element for comparison.
+			// secondEl: the second element for comparison.
+
+	// Return value: the sorted array (the array is sorted in place, no copy is made).
+
+	// Requirements:
+		// It should only take an array as the first argument.
+		// It should accept an optional comparison function as the second argument.
+		// The comparison function should accept firstEl as its first argument.
+		// The comparison function should accept secondEl as Its second argument.
+		// It should return a sorted array.
+		// If indexes with undefined exist, they should be sorted to the end of the array.
+		// It should sort holes as undefined elements.
+function sort(array, compareFunction) {
+	if ( !Array.isArray(array) ) {
+		throw new TypeError(array + " is not an array.");
+	}
+
+	for (var i = 0; i < array.length - 1; i++) {
+		compareFunction(array[i], array[i + 1]);
+	}
+
+
+}
+
+tests({
+		// It should only take an array as the first argument.
+		'It should only take an array as the first argument.': function() {
+			//fail();
+			var isTypeError = false;
+
+			try {
+				sort("string");
+			} catch(e) {
+				isTypeError = e instanceof TypeError;
+			}
+
+			eq(true, isTypeError);
+		},
+		// If comparison is not a function, throw a typeError.
+		'If comparison is not a function, throw a typeError.': function() {
+			var isTypeError = false;
+			var testArray = [1, 2, 3, 4];
+
+			try {
+				sort(testArray, "string");
+			} catch(e) {
+				isTypeError = e instanceof TypeError;
+			}
+
+			eq(true, isTypeError);
+		},
+		'The comparison function should accept firstEl as its first argument.': function() {
+			//fail();
+			var testArray = [1];
+			sort(testArray, function(a) {
+				eq(1, a);
+			})
+		},
+		// The comparison function should accept secondEl as its second argument.
+		'The comparison function should accept secondEl as its second argument.': function() {
+			//fail();
+			var testArray = [1, 2];
+			sort(testArray, function(a, b) {
+				eq(2, b);
+			});
+		},
+		// It should return a sorted array.
+		'It should return a sorted array.': function() {
+			//fail();
+			var testArray = [5, 4, 3, 2, 1];
+		},
+		// If indexes with undefined exist, they should be sorted to the end of the array.
+		'If indexes with undefined exist, they should be sorted to the end of the array.': function() {
+			fail();
+		},
+		// It should sort holes as undefined elements.
+		'It should sort holes as undefined elements.': function() {
+			fail();
+		},
+		// If undefined is passed as the comparison function, return the original array.
+		'If undefined is passed as the comparison function, return the original array.': function() {
+			fail();
+		},
+});
+</script>

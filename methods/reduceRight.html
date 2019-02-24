@@ -1,0 +1,224 @@
+<script src="../simpleTest.js"></script>
+<script>
+function reduceRight(array, callback, initialValue) {
+	var resultSoFar;
+	var startingIndex = array.length - 1;
+	var arrayOfNonEmptyElements = Object.keys(array);
+
+	if(!Array.isArray(array)) {
+		throw new TypeError('\"' + array + '\"' + ' is not an array.');
+	}
+
+	// This is how you check instanceof of a function:
+	if (callback instanceof Function === false) {
+		throw new TypeError('\"' + callback + '\"' + ' is not a function.');
+	}
+
+	if (arguments.length < 3) {
+		if (arrayOfNonEmptyElements.length === 0) {
+			throw new TypeError('Reduce of empty array with no initial value.')
+		}
+
+		while (startingIndex in array === false && startingIndex >= 0) {
+			startingIndex--;
+		}
+
+		resultSoFar = array[startingIndex];
+		startingIndex--;
+	} else {
+		resultSoFar = initialValue;
+	}
+
+	for (var i = startingIndex; i >= 0; i--) {
+		if (i in array) {
+			resultSoFar = callback(resultSoFar, array[i], i, array);
+		}
+	}
+
+	return resultSoFar;
+}
+
+tests({
+	// If obj passed is not an array, throw a TypeError.
+	'If obj passed is not an array, throw a TypeError.': function() {
+		//fail();
+
+		// Always assume false.
+		var isTypeError = false;
+
+		// The try block will catch the error reduceRight throws, and will pass control to the catch block.
+		try {
+			reduceRight('not an array', function() {});
+		} catch(e) {
+			// instanceof evaluates to true or false.
+			isTypeError = e instanceof TypeError;
+		}
+
+		eq(true, isTypeError);
+	},
+	// If callback is not a function, throw a TypeError.
+	'If callback is not a function, throw a TypeError.': function() {
+		//fail();
+		var isTypeError = false;
+
+		try {
+			reduceRight([1], 'this is a string');
+		} catch(e) {
+			isTypeError = e instanceof TypeError;
+		}
+		
+		eq(true, isTypeError);
+	},
+	// It should accept accumulator as the first argument to the callback.
+	'It should accept an accumulator as the first argument to the callback.': function() {
+		//fail();
+		reduceRight([1], function(accumulator) {
+			eq(9, accumulator);
+		}, 9);
+	},
+	// It should accept currentValue as the second argument to the callback.
+	'It should accept a currentValue as the second argument to the callback.': function() {
+		//false();
+		reduceRight([1], function(accumulator, currentValue) {
+			eq(1, currentValue);
+		});
+	},
+	// It should accept currentIndex as the third argument to the callback.
+	'It should accept currentIndex as the third argument to the callback.': function() {
+		//fail();
+		reduceRight([1], function(accumulator, currentValue, currentIndex) {
+			eq(0, currentIndex);
+		});
+	},
+	// It should accept originalArray as the fourth argument to the callback.
+	'It should accept originalArray as the fourth argument to the callback.': function() {
+		//fail();
+		var testArray = [1, 2, 3];
+
+		reduceRight(testArray, function(accumulator, currentValue, currentIndex, originalArray) {
+			eq(testArray, originalArray);
+		});
+	},
+	// If initialValue, the callback runs array.length times.
+	'If initialValue, the callback runs array.length times.': function() {
+		//fail();
+		var numOfTimesCallbackHasRun = 0;
+
+		reduceRight([1, 2, 3], function() {
+			numOfTimesCallbackHasRun++;
+		}, 4);
+		eq(3, numOfTimesCallbackHasRun);
+	},
+	// If no initialValue, the callback runs array.length - 1 times.
+	'If no initialValue, the callback runs array.length - 1 times.': function() {
+		var numOfTimesCallbackHasRun = 0;
+
+		reduceRight([1, 2, 3], function() {
+			numOfTimesCallbackHasRun++;
+		});
+
+		eq(2, numOfTimesCallbackHasRun);
+	},
+	// If initialValue is provided, accumulator is equal to initialValue.
+	'If initialValue is provided, accumulator is equal to initialValue': function() {
+		var initialValue = 10;
+		reduceRight([1], function(accumulator) {
+			eq(initialValue, accumulator);
+		}, initialValue);
+	},
+	// If initialValue is provided, currentValue will be equal to the last value in the array.
+	'If initialValue is provided, currentValue will be equal to the last value in the array.': function() {
+		var initialValue = 10;
+		var testArray = [1];
+		reduceRight(testArray, function(accumulator, currentValue) {
+			(initialValue, currentValue);
+		}, initialValue);
+	},
+	// If no initialValue, accumulator is equal to the last value in the array.
+	'If no initialValue, accumulator is equal to the last value in the array.': function() {
+		
+		reduceRight([2, 3], function(accumulator) {
+			eq(3, accumulator);
+		});
+	},
+	// If no initialValue, currentValue is equal to the second to last value.
+	'If no initialValue, currentValue is equal to the second to last value.': function() {
+		//fail();
+		reduceRight([1, 2], function(accumulator, currentValue) {
+			eq(1, currentValue);
+		});
+	},
+	// It should reduce right.
+	'It should reduce right.': function() {
+		//fail();
+		const result1 = reduceRight([1, 2, 3], function(accumulator, currentValue) {
+			return accumulator + currentValue;
+		});
+		eq(6, result1);
+
+		const result2 = reduceRight(['a', 'l', 'e', 'x'], function(accumulator, currentValue) {
+			return accumulator + currentValue;
+		});
+		eq("xela", result2);
+
+		const result3 = reduceRight([1, 2, 3], function(accumulator, currentValue) {
+			return accumulator - currentValue;
+		});
+		eq(0, result3);
+
+		const result4 = reduceRight([1, 2, 3], function(accumulator, currentValue) {
+			return accumulator - currentValue;
+		}, 10);
+		eq(4, result4);
+	},
+	// If array is empty & no initialValue, TypeError is thrown.
+	'If array is empty & no initialValue, TypeError is thrown.': function() {
+		//fail();
+		// vars or f(x)s named "is" store or return boolean values, respectively.
+		var isTypeError = false;
+		try {
+			reduceRight([], function() {});
+		} catch (e) {
+			isTypeError = e instanceof TypeError;
+		}
+
+		eq(true, isTypeError);
+	},
+	// If array only has one element & no initialValue, the single element is returned.
+	'If array only has one element & no initialValue, the single element is returned.': function() {
+		//fail();
+		var result = reduceRight([99], function() {});
+		eq(99, result);
+	},
+	// If initialValue is provided, but the array is empty, return initial value.
+	'If initialValue is provided, but the array is empty, return initial value.': function() {
+		//fail();
+		var result = reduceRight([], function() {}, 100);
+		eq(100, result);
+	},
+	// It should skip holes.
+	'It should skip holes.': function() {
+		// fail();
+		var result = reduceRight([1, , 1, , 1], function(accumulator, currentValue) {
+			return accumulator + currentValue;
+		});
+		eq(3, result);
+
+		var result2 = reduceRight([,,1,,], function(accumulator, currentValue) {
+			return accumulator + currentValue;
+		});
+		eq(result2, 1);
+
+		var result3 = reduceRight([,,,,,], function() {}, 100);
+		eq(100, result3);
+
+		var isTypeError = false;
+		try {
+			reduceRight([,,,,,], function() {});
+		} catch (e) {
+			isTypeError = e instanceof TypeError;
+		}
+		eq(true, isTypeError);
+	}
+});
+</script>

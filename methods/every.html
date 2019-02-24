@@ -1,0 +1,224 @@
+<!-- path to our simpleTest library -->
+<script src="../simpleTest.js"></script>
+
+<script>
+// Notes:
+	// every() tests whether all elements in the array pass the test implemented by the provided function. If so, it returns true; otherwise, false.
+
+		// Takes a callback function which performs a test on each element of an arr. Returns true if the callback function returns a truthy value for every array element; otherwise, false.
+			// the callback can take three args: currentElement, currentIndex, the array find was called upon.
+		// if an element in the array makes the callback falsey, false is immediately returned.
+		// if callback returns a truthy value for all elements, every returns true.
+		// callback is invoked only for indexes of the array wich have assigned values; not for indexes which have been deleted or which have never been assigned values/skips holes.
+		// takes an optional this value.
+		// An empty array returns true.
+
+	//Prototype:
+		// every(array, callback, optionalThis) {
+		// 	for (i in array) {
+		//		if (callback(array[i], i, array) === false) {
+		//			return false;
+		//		}
+		// 	}
+		//	return true;
+		// }
+
+function every(array, callback, optionalThis) {
+	var everyCallback = callback;
+	// NOTE: length is only calculated once, it is not dynamically changed. So even if you add to the array later, this will stay as the length value before the callback is invoked.
+	var length = array.length;
+
+	if (optionalThis) {
+		everyCallback = everyCallback.bind(optionalThis);
+	}
+
+	for (var i = 0; i < length; i++) {
+		// this if statement will skip invoking the callback for any indexes with holes, or elements that have been deleted since the call to every:
+		if (i in array) {
+			if ( !everyCallback(array[i], i, array) ) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+
+tests({
+	// It should run the callback array.length times.
+	'It should run the callback array.length times': function() {
+		//fail();
+		var numOfTimesCallbackHasRun = 0;
+		//debugger;
+		every([1, 2, 3], function(currentElement, currentIndex, array) {
+			numOfTimesCallbackHasRun++;
+			return currentElement > 0;
+		});
+
+		eq(3, numOfTimesCallbackHasRun);
+	},
+	// It should accept the ith element as the first argument to the callback.
+	'It should accept the ith element as the first argument to the callback.': function() {
+		//fail();
+		every([99], function(currentElement) {
+			eq(99, currentElement);
+		});
+	},
+	// It should accept the ith position as the second argument to the callback.
+	'It should accept the ith position as the second argument to the callback.': function() {
+		//fail();
+		every([99], function(currentElement, currentIndex) {
+			eq(0, currentIndex);
+		});
+	},
+	// It should accept the original array as the third argument to the callback.
+	'It should accept the original array as the second argument to the callback.': function() {
+		//fail();
+		var testArray = [99, 999, 9999];
+
+		every(testArray, function(currentElement, currentIndex, originalArray) {
+			eq(testArray, originalArray);
+		});
+	},
+	// It should return true if all elements in the array evaluate to truthy.
+	'It should return true if all elements in the array evaluate to truthy.': function() {
+		//fail();
+		var everyResult = every([1, 1, 1], function(currentElement) {
+			return currentElement > 0;
+		});
+
+		eq(true, everyResult);
+	},
+	// It should return false if an element evaluates to falsey.
+	'It should return false IMMEDIATELY if an element in the array evaluates to falsey.': function() {
+		//fail();
+
+		// Test 1
+		var numOfTimesCallbackHasRun1 = 0;
+		var everyResult1 = every([1, 2, 3, 0, 5], function(currentElement) {
+			numOfTimesCallbackHasRun1++;
+			return currentElement > 0;
+		});
+
+		eq(4, numOfTimesCallbackHasRun1);
+		eq(false, everyResult1);
+
+		// Test 2
+		var numOfTimesCallbackHasRun2 = 0;
+		var everyResult2 = every([0, 1, 2], function(currentElement) {
+			numOfTimesCallbackHasRun2++;
+			return currentElement > 0;
+		});
+
+		eq(1, numOfTimesCallbackHasRun2);
+		eq(false, everyResult2);
+	},
+	// It should exclude holes.
+	'It should exclude holes.': function() {
+		//fail();
+		var numOfTimesCallbackHasRun = 0;
+		every([1, , 2, , 3, , 4], function(currentElement) {
+			numOfTimesCallbackHasRun++;
+			return currentElement > 0;
+		});
+
+		eq(4, numOfTimesCallbackHasRun);
+	},
+	// It should return true if all elements in the array, excluding holes, return true.
+	'It should return true if all elements in the array, excluding holes, return true.': function() {
+		//fail();
+		var numOfTimesCallbackHasRun = 0;
+		var everyResult = every([1, , 2, , 3], function(currentElement) {
+			numOfTimesCallbackHasRun++;
+			return currentElement > 0;
+		});
+
+		eq(3, numOfTimesCallbackHasRun);
+		eq(true, everyResult);
+	},
+	// It should accept an optional this value.
+	'It should accept an optional this value.': function() {
+		//fail();
+		every([1], function() {
+			eq('I am an optional this object.', this.description);
+		}, {description: 'I am an optional this object.'});
+	},
+	// It should return true if an empty array is passed.
+	'It should return true if an empty array is passed.': function() {
+		//fail();
+		var everyResult = every([], function() {});
+		eq(true, everyResult);
+	},
+	// It should return true if an array of only holes is passed.
+	'It should return true if an array of only holes is passed.': function() {
+		//fail();
+		var everyResult = every([,,,,,,], function(currentElement) {
+			return currentElement > 0;
+		});
+
+		eq(true, everyResult);
+
+	},
+	// It should not visit elements which are appended to the array after the call to every begins.
+	'It should not visit elements which are appended to the array after the call to every begins.': function() {
+		//fail();
+		var numOfTimesCallbackHasRun = 0;
+		var testArray = [1, 2, 3];
+		var everyResult = every(testArray, function(currentElement, currentIndex, originalArray) {
+			numOfTimesCallbackHasRun++;
+
+			if (currentIndex === 1) {
+				originalArray.push(4);
+			}
+			
+			return currentElement < 4;
+		});
+
+		eq(3, numOfTimesCallbackHasRun);
+		eq(true, everyResult);
+	},
+	// It should visit all existing values of the array, even if the existing value has changed after the call to every begins.
+	'It should visit all existing values of the array, even if the existing value has changed after the call to every begins.': function() {
+		//fail();
+		var numOfTimesCallbackHasRun = 0;
+		debugger;
+		var everyResult = every([2, 1, 2], function(currentElement, currentIndex, originalArray) {
+			numOfTimesCallbackHasRun++;
+
+			if (currentIndex === 1) {
+				originalArray[currentIndex] = 2;
+			}
+
+			return originalArray[currentIndex] === 2;
+		});
+
+		eq(true, everyResult);
+		eq(3, numOfTimesCallbackHasRun);
+	},
+	// Elements that are deleted are not visited
+	'Elements that are deleted are not visited': function() {
+		//fail();
+		var numOfTimesCallbackHasRun = 0;
+		var everyResult = every([2, 2, 1], function(currentElement, currentIndex, originalArray) {
+			numOfTimesCallbackHasRun++;
+
+			if (currentIndex === 1) {
+				originalArray.splice(currentIndex + 1, 1);
+			}
+
+			return currentElement === 2;
+		});
+
+		eq(true, everyResult);
+		eq(2, numOfTimesCallbackHasRun);
+
+	},
+	// If the callback evaluates to undefined (no body in the callback), return false.
+	'If the callback evaluates to undefined, return false.': function() {
+		//fails();
+		var everyResult = every([1, 2, 3], function() {});
+
+		eq(false, everyResult);
+	}
+});
+</script>

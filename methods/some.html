@@ -1,0 +1,209 @@
+<script src="../simpleTest.js"></script>
+<script>
+// Notes:
+	// The some() method tests whether at least one element in the array passes the test implemented by the provided function. It returns true or false; true once the first truthy value in the array is found, false if it is never found.
+
+	// It should execute the callback array.length times if all elements evaluate to falsey.
+	// It should execute the callback n + 1 times, where n is the index at which the first truthy value exists.
+
+	// It should take the ith element as the first argument to the callback.
+	// It should take the ith position as the second argument to the callback.
+	// It should take the original array as the third argument to the callback.
+	// It should take an optional this value.
+
+	// It should return true if an array value makes the callback evaluates to true.
+	// IT should return false if none of the array values evaluate to true.
+
+	// It is not invoked for indexes which have been deleted.
+	// It should skip holes.
+
+	// It should not visit elements which are appended to the array after the call to every begins.
+	// It should visit all existing values of the array, even if the existing value has changed after the call to every begins.
+
+	// Prototype:
+		// function some(array, callback, optionalThis) {
+			// for (let i = 0; i < array.length; i++) {
+				// if (callback()) {
+					// return true;
+				// }
+			// }
+			// return false;
+		// }
+
+function some(array, callback, optionalThis) {
+	let someCallback = callback;
+	const length = array.length;
+
+	if (optionalThis) {
+		someCallback = someCallback.bind(optionalThis);
+	}
+
+	for (let i = 0; i < length; i++) {
+		if (i in array) {
+			if (someCallback( array[i], i, array )) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+tests({
+	// It should execute the callback array.length times if all elements evaluate to falsey.
+	'It should execute the callback array.length times if all elements evaluate to falsey.': function() {
+		//fail();
+		let numOfTimesCallbackHasRun = 0;
+
+		some([1, 1, 1, 1], function() {
+			numOfTimesCallbackHasRun++;
+		});
+
+		eq(4, numOfTimesCallbackHasRun);
+	},
+	// It should execute the callback n + 1 times, where n is the index at which the first truthy value exists.
+	'It should execute the callback n + 1 times, where n is the index at which the first truthy value exists.': function() {
+		//fail();
+		let numOfTimesCallbackHasRun = 0;
+
+		some([1, 1, 1, 2, 1, 1], function(currentElement) {
+			numOfTimesCallbackHasRun++;
+			return currentElement === 2;
+		});
+
+		eq(4, numOfTimesCallbackHasRun);
+	},
+	// It should take the ith element as the first argument to the callback.
+	'It should take the ith element as the first argument to the callback.': function() {
+		//fail();
+		some([99], function(currentElement) {
+			eq(99, currentElement);
+		});
+	},
+	// It should take the ith position as the second argument to the callback.
+	'It should take the ith position as the second argument to the callback.': function() {
+		//fail();
+		some([99], function(currentElement, currentIndex) {
+			eq(0, currentIndex);
+		})
+	},
+	// It should take the original array as the third argument to the callback.
+	'It should take the original array as the third argument to the callback': function() {
+		//fail();
+		const testArray = [1, 2, 3];
+
+		some(testArray, function(currentElement, currentIndex, originalArray) {
+			eq(testArray, originalArray);
+		})
+	},
+	// It should accept an optional this value.
+	'It should accept an optional this value.': function() {
+		//fail();
+		some([1, 2, 3], function() {
+			eq(this.description, 'I am an optional this value');
+		}, {description: 'I am an optional this value'});
+	},
+	// It should return true if an array value makes the callback evaluates to true.
+	'It should return true if an array value makes the callback evaluate to true.': function() {
+		//fail();
+		let numOfTimesCallbackHasRun = 0;
+
+		const someResult = some([1, 2, 3, 4], function(currentElement) {
+			numOfTimesCallbackHasRun++;
+			return currentElement % 3 === 0;
+		});
+
+		eq(true, someResult);
+		eq(3, numOfTimesCallbackHasRun);
+	},
+	// It should return false if none of the array values evaluate to true.
+	'It should return false if none of the array values evaluate to true.': function() {
+		let numOfTimesCallbackHasRun = 0;
+
+		const someResult = some([1, 2, 4, 5], function(currentElement) {
+			numOfTimesCallbackHasRun++;
+			return currentElement % 3 === 0;
+		});
+
+		eq(false, someResult);
+		eq(4, numOfTimesCallbackHasRun);
+	},
+	// It is not invoked for indexes which have been deleted.
+	'It is not invoked for indexes which have been deleted.': function() {
+		//fail();
+		let numOfTimesCallbackHasRun = 0;
+
+		some([1, 2, 3, 4, 5, 6, 8], function(currentElement, currentIndex, originalArray) {
+			numOfTimesCallbackHasRun++;
+
+			if (currentIndex == 1 || currentIndex == 4) {
+				originalArray.splice(currentIndex + 1, 1);
+			}
+		});
+
+		eq(5, numOfTimesCallbackHasRun);
+	},
+	// It should skip holes.
+	'It should skip holes.': function() {
+		//fail();
+		let numOfTimesCallbackHasRun = 0;
+		some([, , , , 1], function() {
+			numOfTimesCallbackHasRun++;
+		});
+
+		eq(1, numOfTimesCallbackHasRun);
+	},
+	// It should not visit elements which are appended to the array after the call to every begins.
+	'It should not visit elements which are appended to the array after the call to every begins.': function() {
+		//fail();
+		let numOfTimesCallbackHasRun = 0;
+
+		some([1, 2, 3, 4], function(currentElement, currentIndex, originalArray) {
+			numOfTimesCallbackHasRun++;
+
+			if (currentIndex == 1) {
+				originalArray.push(5);
+			}
+		});
+
+		eq(4, numOfTimesCallbackHasRun);
+	},
+	// It should visit all existing values of the array, even if the existing value has changed after the call to every begins.
+	'It should visit all existing values of the array, even if the existing value has changed after the call to every begins.': function() {
+		//fail();
+		let numOfTimesCallbackHasRun = 0;
+		//debugger;
+		const someResult = some([2, 2, 2, 1, 2, 2], function(currentElement, currentIndex, originalArray) {
+			numOfTimesCallbackHasRun++;
+
+			if (currentIndex == 2) {
+				originalArray[currentIndex + 1] = 2;
+			}
+
+			return currentElement != 2;
+		});
+
+		eq(6, numOfTimesCallbackHasRun);
+		eq(false, someResult);
+	},
+	// It should return false for any condition put on an empty array.
+	'It should return false for any condition put on an empty array.': function() {
+		//fail();
+		// Test 1
+		const someResult1 = some([], function() {});
+		eq(false, someResult1);
+
+		// Test 2
+		const someResult2 = some([], function(currentElement, currentIndex, originalArray) {
+			return !currentElement;
+		});
+		eq(false, someResult2);
+
+		// Test 3
+		const someResult3 = some([], function(currentElement, currentIndex, originalArray) {
+			return currentElement >= 0;
+		});
+		eq(false, someResult3);
+
+	}
+});
+</script>

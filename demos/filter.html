@@ -1,0 +1,82 @@
+<script src="../tinytest.js"></script> <!-- path where our library can be found -->
+<script>
+
+function filter(arrayToFilter, callback, optionalThisObject) {
+	let filterCallback = callback;
+	const filteredArr = [];
+
+	if (optionalThisObject) {
+		filterCallback = filterCallback.bind(optionalThisObject);
+	}
+
+	for (let i = 0; i < arrayToFilter.length; i++) {
+		// if you only want to return elements where the callback returns true, you need to use an if statment THEN invoke the callback:
+		if (filterCallback(arrayToFilter[i], i, arrayToFilter)) { // this will return either true or false when it executes the callback, keep that in mind!!
+			filteredArr.push(arrayToFilter[i]);
+		}
+	}
+
+	return filteredArr;
+}
+
+tests({
+	'It should run the callback array.length times': function() {
+		//fail();
+		let numberOfTimesCallbackHasRun = 0;
+
+		filter([1, 2, 3, 4], function() {
+			numberOfTimesCallbackHasRun++;
+		})
+
+		eq(4, numberOfTimesCallbackHasRun);
+	},
+	'It should accept the ith element being processed in the array as an argument to the callback': function() {
+		//fail();
+		filter([99], function(el) {
+			eq(99, el);
+		})
+	},
+	'It should accept the current index being processed as a second argument to the callback': function() {
+		filter([999], function(el, index) {
+			eq(0, index);
+		})
+	},
+	'It should accept the original array that gets filtered as a third argument to the callback': function() {
+		//fail();
+		const arrToFilter = [1, 2, 3, 4, 5];
+
+		filter(arrToFilter, function(el, index, originalArray) {
+			eq(arrToFilter, originalArray);
+		})
+	},
+	'It should accept a conditional this object as a third argument to filter': function() {
+		//fail();
+		filter([1], function(el, index, originalArray) {
+			eq("I am an optional this object that can be seen inside the callback function if I am passed", this.description);
+		}, {description: "I am an optional this object that can be seen inside the callback function if I am passed"})
+	},
+	'It should return an array': function() {
+		//fail();
+		const testArray = [1, 2, 3];
+		const returnedArray = filter(testArray, function(el, index, originalArray) {}); // you can test simple conditions like so, that is, w/o having a function body.
+
+		// the Array.isArray method will return a boolean value based on the argument passed to it.
+		eq(Array.isArray(returnedArray), true);
+	},
+	'It should return the new array, not the array being filtered': function() {
+		//fail();
+		const arrayToFilter = [1, 2, 3];
+		const filteredArray = filter(arrayToFilter, function(el, index, originalArray) {});
+
+		eq(arrayToFilter !== filteredArray, true);
+	},
+	'It should return a new array that only has elements where callback returns true': function() {
+		const filteredArray = filter([1, 2], function(el) {
+			return el > 1;
+		});
+		
+		eq(filteredArray.length, 1);
+		eq(filteredArray[0], 2);
+	}
+});
+</script>
