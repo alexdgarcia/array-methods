@@ -24,11 +24,37 @@ function sort(array, compareFunction) {
 		throw new TypeError(array + " is not an array.");
 	}
 
-	for (var i = 0; i < array.length - 1; i++) {
-		compareFunction(array[i], array[i + 1]);
+	// If compareFunction is not supplied, sort the array by converting the array elements to strings and comparing them:
+	if (arguments.length === 1) {
+		for (var i = 0; i < array.length; i++) {
+			for (var j = i; j < array.length; j++) {
+				var currentElement = array[i];
+				var currentElementOuter = "" + array[i];
+				var currentElementInner = "" + array[j];
+
+				if (currentElementOuter > currentElementInner || currentElement === undefined) {
+					array[i] = array[j];
+					array[j] = currentElement;
+				}
+			}
+		}
+	} else if (arguments[1] === undefined) {
+		return array;
+	} else {
+		for (var i = 0; i < array.length; i++) {
+			for (var j = i + 1; j < array.length; j++) {
+				var currentElement = array[i];
+
+				if ( compareFunction(array[i], array[j]) > 0 || currentElement === undefined ) {
+					array[i] = array[j];
+					array[j] = currentElement;
+				}
+			}
+		}
 	}
 
 
+	return array;
 }
 
 tests({
@@ -44,6 +70,20 @@ tests({
 			}
 
 			eq(true, isTypeError);
+		},
+		// It should return a sorted array of numbers.
+		'It should return a sorted array.': function() {
+			//fail();
+			var testArray = [5, 4, 3, 2, 1];
+			var result = sort(testArray);
+			eq( JSON.stringify([1, 2, 3, 4, 5]), JSON.stringify(result) );
+		},
+		// It should return a sorted array of strings.
+		'It should return a sorted array of strings.': function() {
+			//fail();
+			var testArray = ['March', 'Jan', 'Feb', 'Dec'];
+			var result = sort(testArray);
+			eq( JSON.stringify(["Dec", "Feb", "Jan", "March"]), JSON.stringify(result) );
 		},
 		// If comparison is not a function, throw a typeError.
 		'If comparison is not a function, throw a typeError.': function() {
@@ -73,22 +113,104 @@ tests({
 				eq(2, b);
 			});
 		},
-		// It should return a sorted array.
-		'It should return a sorted array.': function() {
+		// If compareFunction(a, b) is less than 0, sort a to a lower index than b.
+		'If compareFunction(a, b) is less than 0, sort a to a lower index than b.': function() {
 			//fail();
+			var testArray = [1, 3, 2];
+			var result = sort(testArray, function(a, b) {
+				return a - b;
+			});
+			eq( JSON.stringify([1, 2, 3]), JSON.stringify(result) );
+		},
+		// If compareFunction(a, b) is greater than 0, sort b to an an index lower than a.
+		'If compareFunction(a, b) is greater than 0, sort b to an an index lower than a.': function() {
+			//fail();
+			// Test 1:
 			var testArray = [5, 4, 3, 2, 1];
+			var result = sort(testArray, function(a, b) {
+				return a - b;
+			});
+			eq( JSON.stringify([1, 2, 3, 4, 5]), JSON.stringify(result) );
+
+			// Test 2:
+			var testArray2 = [9, 8, 1, 6, 4];
+			var result2 = sort(testArray2, function(a, b) {
+				return b - a;
+			});
+			eq( JSON.stringify([9, 8, 6, 4, 1]), JSON.stringify(result2) );
+		},
+		// If compareFunction(a, b) returns 0, leave a and b unchanged.
+		'If compareFunction(a, b) returns 0, leave a and b unchanged.': function() {
+			//fail();
+			var testArray = [1, 1, 1, 1, 1];
+			var result = sort(testArray, function(a, b) {
+				return a - b;
+			});
+			eq( JSON.stringify([1, 1, 1, 1, 1]), JSON.stringify(result) );
+
 		},
 		// If indexes with undefined exist, they should be sorted to the end of the array.
 		'If indexes with undefined exist, they should be sorted to the end of the array.': function() {
-			fail();
+			//fail();
+			// Test 1:
+			var testArray = [1, undefined, 2, undefined, 3];
+			var result = sort(testArray);
+			eq( JSON.stringify([1, 2, 3, undefined, undefined]), JSON.stringify(result) );
+
+			// Test 2:
+			var testArray2 = [1, undefined, 2, undefined, 3];
+			var result2 = sort(testArray2, function(a, b) {
+				return a - b;
+			});
+			eq( JSON.stringify([1, 2, 3, undefined, undefined]), JSON.stringify(result2) );
+
+			// Test 3:
+			var testArray3 = [6, 1, 3, undefined, 2, undefined];
+			var result3 = sort(testArray3, function(a, b) {
+				return b - a;
+			});
+			eq( JSON.stringify([6, 3, 2, 1, undefined, undefined]), JSON.stringify(result3) );
 		},
 		// It should sort holes as undefined elements.
 		'It should sort holes as undefined elements.': function() {
-			fail();
+			//fail();
+			var testArray = [2, , 1, , 3];
+			var result = sort(testArray, function(a, b) {
+				return a - b;
+			});
+			eq( JSON.stringify([1, 2, 3, undefined, undefined]), JSON.stringify(result) );
 		},
 		// If undefined is passed as the comparison function, return the original array.
 		'If undefined is passed as the comparison function, return the original array.': function() {
-			fail();
+			//fail();
+			var testArray = [1, 2, 3];
+			var result = sort(testArray, undefined);
+			eq( JSON.stringify([1, 2, 3]), JSON.stringify(result) );
+		},
+		// It should sort objects by one of their properties.
+		'It should sort objects by one of their properties.': function() {
+			//fail();
+			var items1 = [
+			  { name: 'Edward', value: 21 },
+			  { name: 'Sharpe', value: 37 },
+			  { name: 'And', value: 45 },
+			  { name: 'The', value: -12 },
+			  { name: 'Magnetic', value: 13 },
+			  { name: 'Zeros', value: 37 }
+			];
+			// Sort by values:
+			var result1 = sort(items1, function (a, b) {
+  				return a.value - b.value;
+			});
+			eq( JSON.stringify([
+				{ name: 'The', value: -12 },
+				{ name: 'Magnetic', value: 13 },
+				{ name: 'Edward', value: 21 },
+				{ name: 'Sharpe', value: 37 },
+				{ name: 'Zeros', value: 37 },
+				{ name: 'And', value: 45 }
+				]), 
+				JSON.stringify(result1) );
 		},
 });
 </script>
