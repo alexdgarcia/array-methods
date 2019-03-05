@@ -35,3 +35,4 @@ tests(); /* Object that stores tests and executes them sequentially until end, o
 ```
 
 ### Results
+![alt text](https://github.com/alexdgarcia/array-methods/blob/master/Screen%20Shot%202019-03-04%20at%207.29.52%20PM.png)
