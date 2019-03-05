@@ -35,4 +35,8 @@ tests(); /* Object that stores tests and executes them sequentially until end, o
 ```
 
 ### Results
-![alt text](https://github.com/alexdgarcia/array-methods/blob/master/Screen%20Shot%202019-03-04%20at%207.29.52%20PM.png)
+Green means your tests pass.
+![A browser screen with a green background, denoting that all tests passed.](https://github.com/alexdgarcia/array-methods/blob/master/Screen%20Shot%202019-03-04%20at%207.29.52%20PM.png)
+
+Red means a test has resulted in an error.
+![A browser screen with a red background, denoting that the current test failed.](https://github.com/alexdgarcia/array-methods/blob/master/Screen%20Shot%202019-03-04%20at%207.30.21%20PM.png)
