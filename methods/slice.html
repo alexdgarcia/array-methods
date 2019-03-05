@@ -25,25 +25,15 @@
 		var counter = 0;
 
 		if (!Array.isArray(array)) {
-			throw new TypeError(array + " is not an array.");
+			throw new TypeError(`${array} is not an array.`);
 		}
 
 		if (typeof begin === "number") {
-			if (begin < 0) {
-				startingIndex = length + begin;
-			} else {
-				startingIndex = begin;
-			}
+			startingIndex = begin < 0 ? length + begin : begin;
 		}
 
 		if (typeof end === "number") {
-			if (end < 0) {
-				length = length + end;
-			} else if (end > length) {
-				length = length;
-			} else {
-				length = end;
-			}
+			length = end < 0 ? length + end : end;
 		}
 
 		for (let i = startingIndex; i < length; i++) {
@@ -159,12 +149,12 @@ tests({
 	'If end and begin, return an array between those two indexes not including end.': function() {
 		//fail();
 		var testArray = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-	//debugger;
 		var sliceArray = slice(testArray, 2, 7);
 		eq(5, sliceArray.length);
 		sliceArray.forEach(function(el, index) {
 			eq(el, testArray[index + 2]);
 		});
+		eq(JSON.stringify([3, 4, 5, 6, 7]), JSON.stringify(sliceArray));
 	},
 	// It should include holes.
 	'It should include holes.': function() {

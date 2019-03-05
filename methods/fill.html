@@ -27,7 +27,7 @@
 
 function fill(array, value, start, end) {
 	if ( !Array.isArray(array) ) {
-		throw new TypeError(array + " is not an array");
+		throw new TypeError(`${array} is not an array`);
 	}
 
 	if (arguments.length === 2 || start === undefined) {

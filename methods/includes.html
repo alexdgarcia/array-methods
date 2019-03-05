@@ -58,10 +58,10 @@ function includes(array, valueToFind, fromIndex) {
 		}
 	// What's going on here? In JS, NaN has the distinction of being the only value that is not equal to itself. That means we can't find out whether a value is NaN by checking equality to NaN because the answer will always be no. This is still pretty hard to check for so we have to jump through some hoops:
 	} else {
-		valueToFind = valueToFind.toString(); // converts NaN to "NaN"
+		valueToFind = valueToFind + ""; // converts NaN to "NaN"
 
 		for(var i = startingIndex; i < length; i++) {
-			if (array[i].toString() === valueToFind) {
+			if (array[i] + "" === valueToFind) {
 				return true;
 			}
 		}

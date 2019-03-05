@@ -37,8 +37,8 @@
 function lastIndexOf(array, searchElement, fromIndex) {
 	var startingIndex = array.length - 1;
 
-	if (!Array.isArray(array)) {
-		throw new TypeError(array + ' is not an array.');
+	if ( !Array.isArray(array) ) {
+		throw new TypeError(`${array} is not an array.`);
 	}
 
 	if (arguments.length === 3) {
@@ -94,7 +94,6 @@ tests({
 	// If negative fromIndex, the offset is taken from the back of the array.
 	'If negative fromIndex, the offset is taken from the back of the array.': function() {
 		//fail();
-
 		// Test 1:
 		var testArray = [1, 2, 3, 4, 2, 5];
 		result1 = lastIndexOf(testArray, 2, -2);
@@ -114,7 +113,6 @@ tests({
 	// If no fromIndex, return -1.
 	'If no fromIndex, return -1.': function() {
 		//fail();
-
 		var testArray = [1, 2, 3];
 		var result = lastIndexOf(testArray);
 		eq(-1, result);
@@ -129,7 +127,6 @@ tests({
 	// If an empty array is passed, it should return -1;
 	'If an empty array is passed, it should return -1;': function() {
 		//fail();
-
 		var testArray = [];
 		var result = lastIndexOf(testArray, 7);
 		eq(-1, result);

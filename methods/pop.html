@@ -20,12 +20,11 @@ function pop(array) {
 	var lastElement = array[array.length - 1];
 
 	if ( !Array.isArray(array) ) {
-		throw new TypeError(array + " is not an array.")
+		throw new TypeError(`${array} is not an array.`)
 	}
 
-	delete array[array.length - 1]; // this will delete the value at this index, but the index itself will still exist as an empty index.
-
 	if (array.length > 0) {
+		delete lastElement; // this will delete the value at this index, but the index itself will still exist as an empty index.
 		array.length--; // This will remove the last item in the array, we can use this to handle our empty index.
 	}
 
@@ -73,5 +72,14 @@ tests({
 
 			eq(undefined, result);
 		},
+		// If array.length === 1, return an empty array.
+		'If array.length === 1, return an empty array.': function() {
+			//fail();
+			var testArray = [1];
+			var result = pop(testArray);
+			eq(1, result);
+			eq(0, testArray.length);
+			eq(JSON.stringify([]), JSON.stringify(testArray));
+		}
 });
 </script>

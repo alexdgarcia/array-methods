@@ -6,7 +6,7 @@ function reduceRight(array, callback, initialValue) {
 	var arrayOfNonEmptyElements = Object.keys(array);
 
 	if(!Array.isArray(array)) {
-		throw new TypeError('\"' + array + '\"' + ' is not an array.');
+		throw new TypeError(`${array} is not an array.`);
 	}
 
 	// This is how you check instanceof of a function:
@@ -14,7 +14,8 @@ function reduceRight(array, callback, initialValue) {
 		throw new TypeError('\"' + callback + '\"' + ' is not a function.');
 	}
 
-	if (arguments.length < 3) {
+	// If initialValue is not provided.
+	if (!initialValue) {
 		if (arrayOfNonEmptyElements.length === 0) {
 			throw new TypeError('Reduce of empty array with no initial value.')
 		}
@@ -45,7 +46,6 @@ tests({
 
 		// Always assume false.
 		var isTypeError = false;
-
 		// The try block will catch the error reduceRight throws, and will pass control to the catch block.
 		try {
 			reduceRight('not an array', function() {});
@@ -53,20 +53,17 @@ tests({
 			// instanceof evaluates to true or false.
 			isTypeError = e instanceof TypeError;
 		}
-
 		eq(true, isTypeError);
 	},
 	// If callback is not a function, throw a TypeError.
 	'If callback is not a function, throw a TypeError.': function() {
 		//fail();
 		var isTypeError = false;
-
 		try {
 			reduceRight([1], 'this is a string');
 		} catch(e) {
 			isTypeError = e instanceof TypeError;
 		}
-		
 		eq(true, isTypeError);
 	},
 	// It should accept accumulator as the first argument to the callback.
@@ -94,7 +91,6 @@ tests({
 	'It should accept originalArray as the fourth argument to the callback.': function() {
 		//fail();
 		var testArray = [1, 2, 3];
-
 		reduceRight(testArray, function(accumulator, currentValue, currentIndex, originalArray) {
 			eq(testArray, originalArray);
 		});
@@ -103,7 +99,6 @@ tests({
 	'If initialValue, the callback runs array.length times.': function() {
 		//fail();
 		var numOfTimesCallbackHasRun = 0;
-
 		reduceRight([1, 2, 3], function() {
 			numOfTimesCallbackHasRun++;
 		}, 4);
@@ -112,7 +107,6 @@ tests({
 	// If no initialValue, the callback runs array.length - 1 times.
 	'If no initialValue, the callback runs array.length - 1 times.': function() {
 		var numOfTimesCallbackHasRun = 0;
-
 		reduceRight([1, 2, 3], function() {
 			numOfTimesCallbackHasRun++;
 		});
@@ -151,22 +145,26 @@ tests({
 	// It should reduce right.
 	'It should reduce right.': function() {
 		//fail();
-		const result1 = reduceRight([1, 2, 3], function(accumulator, currentValue) {
+		// Test 1:
+		var result1 = reduceRight([1, 2, 3], function(accumulator, currentValue) {
 			return accumulator + currentValue;
 		});
 		eq(6, result1);
 
-		const result2 = reduceRight(['a', 'l', 'e', 'x'], function(accumulator, currentValue) {
+		// Test 2:
+		var result2 = reduceRight(['a', 'l', 'e', 'x'], function(accumulator, currentValue) {
 			return accumulator + currentValue;
 		});
 		eq("xela", result2);
 
-		const result3 = reduceRight([1, 2, 3], function(accumulator, currentValue) {
+		// Test 3:
+		var result3 = reduceRight([1, 2, 3], function(accumulator, currentValue) {
 			return accumulator - currentValue;
 		});
 		eq(0, result3);
 
-		const result4 = reduceRight([1, 2, 3], function(accumulator, currentValue) {
+		// Test 3:
+		var result4 = reduceRight([1, 2, 3], function(accumulator, currentValue) {
 			return accumulator - currentValue;
 		}, 10);
 		eq(4, result4);
@@ -199,19 +197,30 @@ tests({
 	// It should skip holes.
 	'It should skip holes.': function() {
 		// fail();
+		// Test 1:
 		var result = reduceRight([1, , 1, , 1], function(accumulator, currentValue) {
 			return accumulator + currentValue;
 		});
 		eq(3, result);
 
+		// Test 2:
 		var result2 = reduceRight([,,1,,], function(accumulator, currentValue) {
 			return accumulator + currentValue;
 		});
 		eq(result2, 1);
 
+		// Test 3:
 		var result3 = reduceRight([,,,,,], function() {}, 100);
 		eq(100, result3);
 
+		// Test 4:
+		var numOfTimesCallbackHasRun = 0;
+		reduceRight([,,1,,,], function() {
+			numOfTimesCallbackHasRun++;
+		}, 1);
+		eq(1, numOfTimesCallbackHasRun);
+
+		// Test 5:
 		var isTypeError = false;
 		try {
 			reduceRight([,,,,,], function() {});

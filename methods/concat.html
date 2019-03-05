@@ -34,10 +34,9 @@
 	// 	return concatArray;
 	// }
 
-function concat(array1, ...options) {
+function concat(array1) {
+	var argsLength = arguments.length;
 	var concatArray = [];
-
-	console.log(arguments.length);
 
 	// Must perform this check. If you pass a string as the first argument it will concatenate every character in the string individually. String obects have their own concat methods that handle this appropriately, we should only be focused on arrays.
 	if (!Array.isArray(array1)) {
@@ -45,23 +44,22 @@ function concat(array1, ...options) {
 	}
 
 	for (var i = 0; i < array1.length; i++) {
-		concatArray.push(array1[i]);
+		concatArray[i] = array1[i];
 	}
 
-	if (arguments.length > 1) {
-		loop1: // label for the first for loop
-		for(var i = 0; i < options.length; i++) {
-			if ( Array.isArray(options[i]) ) {
-				for (var k = 0; k < options[i].length; k++) {
-					concatArray.push(options[i][k]);
+	if (argsLength > 1) {
+		var startingIndex = concatArray.length;
+
+		for(var i = 1; i < argsLength; i++) {
+			if ( Array.isArray(arguments[i]) ) {
+				for (var k = 0; k < arguments[i].length; k++) {
+					concatArray[startingIndex] = arguments[i][k];
+					startingIndex++;
 				}
-				continue loop1; // I was able to refactor and possibly improve the code using this continue + label statement.
+			} else {
+				concatArray[startingIndex] = arguments[i];
+				startingIndex++;
 			}
-			concatArray.push(options[i]); // on the next iteration, if the argument is not an array, I can just push that element to concat.
-			/* Removed the code below: */
-			// } else {
-			// 	concatArray.push(options[i]);
-			// }
 		}
 	}
 
@@ -155,11 +153,8 @@ tests({
 			name: "Alex",
 			occupation: "IT"
 		}
-		var comparisionArray = [1, 2, 3, alex];
 		var concatArray = concat([1, 2, 3], alex);
-		comparisionArray.forEach(function(el, index) {
-			eq(el, concatArray[index]);
-		});
+		eq(JSON.stringify([1, 2, 3, alex]), JSON.stringify(concatArray));
 	},
 	// If an empty array is provided as the first argument, it should return every subsequent argument concatenated.
 	'If an empty array is provided as the first argument, it should return every subsequent argument concatenated.': function() {
@@ -173,12 +168,8 @@ tests({
 	// It should concatenate holes.
 	'It should concatenate holes.': function() {
 		//fail();
-		var comparisionArray = [1, 2, 3, 4, , 5, , 6, , 7];
 		var concatArray = concat([1, 2, 3], [4, , 5, , 6, , 7]);
-		comparisionArray.forEach(function(el, index) {
-			eq(el, concatArray[index]);
-		});
-		eq(comparisionArray.length, concatArray.length);
+		eq(JSON.stringify([1, 2, 3, 4, , 5, , 6, , 7]), JSON.stringify(concatArray));
 	}
 });
 </script>

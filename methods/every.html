@@ -24,18 +24,18 @@
 		// }
 
 function every(array, callback, optionalThis) {
-	var everyCallback = callback;
-	// NOTE: length is only calculated once, it is not dynamically changed. So even if you add to the array later, this will stay as the length value before the callback is invoked.
+	var everyCallback = optionalThis ? callback.bind(optionalThis) : callback;
+	// NOTE: length here is only calculated once, it is not dynamically changed. So even if you add to the array later, this will stay as the length value before the callback is invoked.
 	var length = array.length;
 
-	if (optionalThis) {
-		everyCallback = everyCallback.bind(optionalThis);
+	if (!Array.isArray(array)) {
+		throw new TypeError(`${array} is not an array.`);
 	}
 
 	for (var i = 0; i < length; i++) {
 		// this if statement will skip invoking the callback for any indexes with holes, or elements that have been deleted since the call to every:
 		if (i in array) {
-			if ( !everyCallback(array[i], i, array) ) {
+			if (!everyCallback(array[i], i, array)) {
 				return false;
 			}
 		}
@@ -45,16 +45,25 @@ function every(array, callback, optionalThis) {
 
 
 tests({
+	// It should only accept an array as its first argument.
+	'It should only accept an array as its first argument.': function() {
+		//fail();
+		var isTypeError = false;
+		try {
+			every("string", function() {});
+		} catch(e) {
+			isTypeError = e instanceof TypeError;
+		}
+		eq(true, isTypeError);
+	},
 	// It should run the callback array.length times.
 	'It should run the callback array.length times': function() {
 		//fail();
 		var numOfTimesCallbackHasRun = 0;
-		//debugger;
 		every([1, 2, 3], function(currentElement, currentIndex, array) {
 			numOfTimesCallbackHasRun++;
 			return currentElement > 0;
 		});
-
 		eq(3, numOfTimesCallbackHasRun);
 	},
 	// It should accept the ith element as the first argument to the callback.
@@ -75,7 +84,6 @@ tests({
 	'It should accept the original array as the second argument to the callback.': function() {
 		//fail();
 		var testArray = [99, 999, 9999];
-
 		every(testArray, function(currentElement, currentIndex, originalArray) {
 			eq(testArray, originalArray);
 		});
@@ -86,20 +94,17 @@ tests({
 		var everyResult = every([1, 1, 1], function(currentElement) {
 			return currentElement > 0;
 		});
-
 		eq(true, everyResult);
 	},
 	// It should return false if an element evaluates to falsey.
 	'It should return false IMMEDIATELY if an element in the array evaluates to falsey.': function() {
 		//fail();
-
 		// Test 1
 		var numOfTimesCallbackHasRun1 = 0;
 		var everyResult1 = every([1, 2, 3, 0, 5], function(currentElement) {
 			numOfTimesCallbackHasRun1++;
 			return currentElement > 0;
 		});
-
 		eq(4, numOfTimesCallbackHasRun1);
 		eq(false, everyResult1);
 
@@ -109,7 +114,6 @@ tests({
 			numOfTimesCallbackHasRun2++;
 			return currentElement > 0;
 		});
-
 		eq(1, numOfTimesCallbackHasRun2);
 		eq(false, everyResult2);
 	},
@@ -121,7 +125,6 @@ tests({
 			numOfTimesCallbackHasRun++;
 			return currentElement > 0;
 		});
-
 		eq(4, numOfTimesCallbackHasRun);
 	},
 	// It should return true if all elements in the array, excluding holes, return true.
@@ -132,7 +135,6 @@ tests({
 			numOfTimesCallbackHasRun++;
 			return currentElement > 0;
 		});
-
 		eq(3, numOfTimesCallbackHasRun);
 		eq(true, everyResult);
 	},
@@ -155,9 +157,7 @@ tests({
 		var everyResult = every([,,,,,,], function(currentElement) {
 			return currentElement > 0;
 		});
-
 		eq(true, everyResult);
-
 	},
 	// It should not visit elements which are appended to the array after the call to every begins.
 	'It should not visit elements which are appended to the array after the call to every begins.': function() {
@@ -173,7 +173,6 @@ tests({
 			
 			return currentElement < 4;
 		});
-
 		eq(3, numOfTimesCallbackHasRun);
 		eq(true, everyResult);
 	},
@@ -181,7 +180,6 @@ tests({
 	'It should visit all existing values of the array, even if the existing value has changed after the call to every begins.': function() {
 		//fail();
 		var numOfTimesCallbackHasRun = 0;
-		debugger;
 		var everyResult = every([2, 1, 2], function(currentElement, currentIndex, originalArray) {
 			numOfTimesCallbackHasRun++;
 
@@ -191,7 +189,6 @@ tests({
 
 			return originalArray[currentIndex] === 2;
 		});
-
 		eq(true, everyResult);
 		eq(3, numOfTimesCallbackHasRun);
 	},
@@ -208,16 +205,13 @@ tests({
 
 			return currentElement === 2;
 		});
-
 		eq(true, everyResult);
 		eq(2, numOfTimesCallbackHasRun);
-
 	},
 	// If the callback evaluates to undefined (no body in the callback), return false.
 	'If the callback evaluates to undefined, return false.': function() {
 		//fails();
 		var everyResult = every([1, 2, 3], function() {});
-
 		eq(false, everyResult);
 	}
 });

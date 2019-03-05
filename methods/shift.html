@@ -16,17 +16,16 @@ function shift(array) {
 	var shiftElement = array[0];
 
 	if ( !Array.isArray(array) ) {
-		throw new TypeError(array + " is not an array.");
+		throw new TypeError(`${array} is not an array.`);
 	}
-
-	delete array[0];
+	// delete shiftElement; <--- no need for this.
 
 	for (var i = 0; i < array.length - 1; i++) {
 		array[i] = array[i + 1];
 	}
 
 	if (array.length === 0) {
-		return shiftElement;
+		return shiftElement; // If array.length is 0, shiftElement will be undefined.
 	} else {
 		array.length--;
 	}

@@ -4,11 +4,13 @@
 <script>
 // Notes:
 	// find returns the value of the first element in the array that satisfies the provided testing function; otherwise undefined;
+
+	// Parameters:
 		// Takes a callback function which performs a test on each element of an arr, until it finds the first element that satisfies the function.
-			// the callback can take three parameters: currentElement, currentIndex, the array find was called upon
-		// takes an optional this value
-		// iterates over empty values as well/does not skip holes
-		// does not mutate the original array
+			// the callback can take three parameters: currentElement, currentIndex, the array find() was called upon.
+		// takes an optional this value.
+		// iterates over empty values as well/does not skip holes.
+		// does not mutate the original array.
 
 	//Prototype:
 		// find(array, callback, optionalThis) {
@@ -20,19 +22,11 @@
 		// }
 
 function find(array, callback, optionalThis) {
-	let findCallback = callback;
+	// If optionalThis is passed as an argument to find, bind callback to it and store it in a variable. Else, just store it in that variable.
+	var findCallback = optionalThis ? callback.bind(optionalThis) : callback;
 
 	if (!Array.isArray(array)) {
-		throw new TypeError (array + " is not an array.");
-	}
-
-	// if (arguments.length === 3) {
-	// 	findCallback = findCallback.bind(optionalThis);
-	// }
-
-	// Remember, you can check for a true condition by writing the following if statement:
-	if (optionalThis) {
-		findCallback = findCallback.bind(optionalThis);
+		throw new TypeError (`${array} is not an array.`);
 	}
 
 	for (let i = 0; i < array.length; i++) {
@@ -58,13 +52,12 @@ tests({
 	},
 	'It should run the callback array.length times': function() {
 		//fail();
-		let numOfTimesCallbackHasRun = 0;
+		var numOfTimesCallbackHasRun = 0;
 		
-		// This function does not explicitly return, so it will return undefined, which evaluates to false. It will still run the callback every time though, to try to determine if it will evaluate to true or to false. While it is being run, whether we return undefined or not, our function body's code is executing and the numOfTimesCallbackHasRun counter increments.
+		// This function does not explicitly return, so it will return undefined, which evaluates to false. It will still run the callback every time though, to try to determine if the callback will evaluate to true or to false. While it is being run, whether we return undefined or not, our function body's code is executing and the numOfTimesCallbackHasRun counter increments.
 		find([1, 2, 3], function() {
 			numOfTimesCallbackHasRun++;
 		})
-
 		eq(3, numOfTimesCallbackHasRun);
 	},
 	'It should accept the ith element as the first argument to the callback': function() {
@@ -81,7 +74,7 @@ tests({
 	},
 	'It should accept the original array as the third argument to the callback': function() {
 		//fail();
-		const testArr = [1, 2, 99];
+		var testArr = [1, 2, 99];
 
 		find(testArr, function(currElement, currIndex, originalArray) {
 			eq(true, testArr === originalArray);
@@ -96,36 +89,43 @@ tests({
 	'It should not skip holes': function() {
 		//fail();
 		let numOfTimesCallbackHasRun = 0;
-
 		find([,,,,,,], function() {
 			numOfTimesCallbackHasRun++;
 		});
-
 		eq(6, numOfTimesCallbackHasRun);
 	},
 	'It should return a find value': function() {
 		//fail();
-		const array1 = [5, 12, 8, 130, 44];
+		var array1 = [5, 12, 8, 130, 44];
 
-		const findResult = find(array1, function(currElement) {
+		var findResult = find(array1, function(currElement) {
 			return currElement > 10;
 		})
 
 		eq(12, findResult);
 	},
+	'It should be able to search through arrays of objects': function() {
+		//fail();
+		var testArray = [
+			{name: 'apples', quantity: 2},
+			{name: 'bananas', quantity: 0},
+			{name: 'cherries', quantity: 5}
+		];
+		var result = find(testArray, function(el) {
+			return el.name === 'cherries';
+		});
+		eq(testArray[2], result);
+	},
 	'If the condition does not evaluate to true, undefined should be returned': function() {
 		//fail();
-		const findResult = find([], function(currElement) { // this test case is pretty simple because all f(x)s return undefined implicitly.
+		var findResult = find([], function(currElement) { // this test case is pretty simple because all f(x)s return undefined implicitly.
 			return currElement > 0;
 		});
-
 		eq(undefined, findResult)
 	},
 	'It should return undefined if the callback does not have a return statement': function() {
 		//fail();
-
-		const findResult = find([1, 2, 3], function() {});
-
+		var findResult = find([1, 2, 3], function() {});
 		eq(undefined, findResult);
 	}
 });

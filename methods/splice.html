@@ -1,0 +1,307 @@
+<script src="../simpleTest.js"></script>
+<script>
+// Notes:
+	// The splice() method changes the content of an array by removing or replacing existing elements and/or adding new elements.
+
+	// Parameters:
+		// start: index at which to start changing the array (with origin 0).
+			// If greater than array.length, actual starting index will be set to the length of the array (and will add the element at this position, if an element is to be appended to the array).
+		// deleteCount (optional): An integer indicating the number of old array elements to remove.
+			// If deleteCount is omitted, then all elements from start through the end of the array will be deleted.
+			// If deleteCount === array.length - start, then all of the elements from start through the end of the array will be deleted.
+			// If deleteCount > array.length - start, then all of the elements from start through the end of the array will be deleted.
+			// If deleteCount is 0 or negative, no elements are removed.
+		// item1, item2, ... (optional): The elements to add to the array, beginning at the start index. If you don't specify any elements, splice() will only remove elements from the array.
+
+	// Return value: An array containing the deleted elements.
+
+	// Requirements:
+		// It must only accept arrays as its first argument.
+		// If start, begin iterating at the given index.
+		// It should return an array.
+		// If start > array.length, the starting index should be set to array.length.
+		// If no deleteCount, delete all elements from start to end of array.
+		// If deleteCount is equal to the difference between array.length and start, delete all elements from start to end of array.
+		// If deleteCount is greater than the difference between array.length and start, delete all elements from start to the end of the array.
+		// If deleteCount is 0, no elements are removed.
+		// If start < 0 and no deleteCount, delete all elements from index 0 to end of the array.
+		// The returned array should contain all the deleted elements.
+		// If addItem, add the item at the starting index.
+		// addItem can take a variable number of arguments.
+		// If addItem and start > array.length, add the item at array.length.
+
+function splice(array, start, deleteCount) {
+	var arrayOfDeletedElements = [];
+	var arrayOfItemsToAdd = [];
+	var length = array.length;
+	var argumentsLength = arguments.length;
+	var startIndex = 0;
+
+	if ( !Array.isArray(array) ) {
+		throw new TypeError(array + " is not an array");
+	}
+
+	start = (start > length) ? length : /* REFACTORED */
+		(start < 0 && -start > length) ? 0 :
+		(start < 0) ? length + start : start;
+
+	if (argumentsLength > 2) { // Maybe delete this first condition?
+		if (deleteCount === length - start || deleteCount > length - start) {
+			deleteCount = length;
+		} else if (deleteCount === 0) {
+			deleteCount = start;
+		} else {
+			deleteCount = start + deleteCount;
+		}
+	} else {
+		deleteCount = length;
+	}
+
+	
+	// REFACTORED. Iterates from start up to but not including stop, and deletes elements at indexes within that range:
+	for (var i = 0; i < deleteCount - start; i++) {
+		arrayOfDeletedElements[i] = array[start + i];
+		delete array[start + i];
+	}
+
+	// Sets the elements in the original array to what they should be post-splice:
+	for (var i = 0; i < length; i++) {
+		if (i in array) {
+			array[startIndex] = array[i];
+			startIndex++;
+		}
+	}
+
+	// The difference of length and start determines how many indexes from the end of the array have to be removed:
+	for(var i = 0; i < length - startIndex; i++) {
+		array.length--;
+	}
+
+	// Adds the passed addItem arguments to arrayOfItemsToAdd.
+	if (argumentsLength > 3) {
+		var holderArray = [];
+		startIndex = 0;
+
+		for (var i = 3; i < argumentsLength; i++) {
+			arrayOfItemsToAdd[startIndex] = arguments[i];
+			startIndex++;
+
+			if (i === argumentsLength - 1) {
+				startIndex = 0;
+			}
+		}
+
+		// Add current elements at start until end to a holderArray:
+		for (var j = start; j < array.length; j++) {
+			holderArray[startIndex] = array[j];
+			startIndex++;
+		}
+
+		// Remove the extra elements, because we will be adding them back later.
+		if (arrayOfItemsToAdd.length < array.length - start) {
+			for (var m = 0; m < holderArray.length; m++) {
+				array.length--;
+			}
+		}
+
+		// Add the addItems to the array.
+		for (var k = 0; k < arrayOfItemsToAdd.length; k++) {
+			array[start] = arrayOfItemsToAdd[k];
+			start++;
+		}
+
+		// Add the original elements, now in holderArray, back to the original array.
+		for (var l = 0; l < holderArray.length; l++) {
+			array[array.length] = holderArray[l];
+		}
+	}
+
+	return arrayOfDeletedElements;
+}
+
+tests({
+		// It must only accept arrays as its first argument.
+		'It must only accept arrays as its first argument.': function() {
+			//fail();
+			var isTypeError = false;
+			var testArray = "string";
+
+			try {
+				splice(testArray);
+			} catch(e) {
+				isTypeError = e instanceof TypeError;
+			}
+
+			eq(true, isTypeError);
+		},
+		// It should return an array.
+		'It should return an array.': function() {
+			//fail();
+			var testArray = [1];
+			var result = splice(testArray);
+			eq(true, Array.isArray(result));
+		},
+		// If start, begin iterating at the given index.
+		'If start, begin iterating at the given index.': function() {
+			//fail();
+			var testArray = [1, 2];
+			var result = splice(testArray, 1);
+			eq( JSON.stringify([2]), JSON.stringify(result) );
+
+		},
+		// If no start, return an empty array.
+		'If no start, return an empty array.': function() {
+			//fail();
+			var testArray = [1, 2, 3];
+			var result = splice(testArray);
+			eq( JSON.stringify([]), JSON.stringify(result) );
+		},
+		// If start < 0, the offset is from the end of the array.
+		'If start < 0, the offset is from the end of the array.': function() {
+			//fail();
+			var testArray = [1, 2, 3];
+			var startIndex = -2;
+			var result = splice(testArray, startIndex);
+			eq( JSON.stringify([2, 3]), JSON.stringify(result) );
+		},
+		// If start > array.lenth, the starting index will be set to the length of the array.
+		'If start > array.lenth, the starting index will be set to the length of the array.': function() {
+			//fail();
+			var testArray = [1, 2, 3];
+			var startIndex = 100;
+			splice(testArray, startIndex);
+			eq( JSON.stringify([1, 2, 3]), JSON.stringify(testArray) );
+		},
+		// If absolute value of start is greater than the length of the array, start is set to 0.
+		'If absolute value of start is greater than the length of the array, start is set to 0.': function () {
+			//fail();
+			var testArray = [1, 2, 3];
+			var startIndex = -4;
+			var result = splice(testArray, startIndex);
+			eq( JSON.stringify([1, 2, 3]), JSON.stringify(result) );
+		},
+		// If no deleteCount, delete all elements from start to end of array.
+		'If no deleteCount, delete all elements from start to end of array.': function() {
+			//fail();
+			var testArray = [1, 2, 3];
+			var result = splice(testArray, 1);
+			eq( JSON.stringify([2, 3]), JSON.stringify(result) );
+		},
+		// The original array should be mutated accordingly.
+		'The original array should be mutated accordingly.': function() {
+			//fail();
+			// Test 1:
+			var testArray1 = [1, 2, 3];
+			result1 = splice(testArray1, 1);
+			eq( JSON.stringify([1]), JSON.stringify(testArray1) );
+			eq( JSON.stringify([2, 3]), JSON.stringify(result1) );
+
+			// Test 2:
+			var testArray2 = [1, 2, 3, undefined, 4, undefined, 6, 7, 8];
+			result2 = splice(testArray2, 2, 3);
+			eq( JSON.stringify([1, 2, undefined, 6, 7, 8]), JSON.stringify(testArray2) );
+			eq( JSON.stringify([3, undefined, 4]), JSON.stringify(result2) );
+		},
+		// If deleteCount is equal to the difference between array.length and start, delete all elements from start to end of array.
+		'If deleteCount is equal to the difference between array.length and start, delete all elements from start to end of array.': function() {
+			//fail();
+			var testArray = [1, 2, 3];
+			var result = splice(testArray, 1, 2);
+			eq( JSON.stringify([2, 3]), JSON.stringify(result) );
+			eq( JSON.stringify([1]), JSON.stringify(testArray) );
+		},
+		// If deleteCount is greater than the difference between array.length and start, delete all elements from start to the end of the array.
+		'If deleteCount is greater than the difference between array.length and start, delete all elements from start to the end of the array.': function() {
+			//fail();
+			var testArray = [1, 2, 3];
+			var result = splice(testArray, 1, 100);
+			eq( JSON.stringify([2, 3]), JSON.stringify(result) );
+			eq( JSON.stringify([1]), JSON.stringify(testArray) );
+		},
+		// If deleteCount is 0, no elements are removed. //
+		'If deleteCount is 0, no elements are removed.': function() {
+			//fail();
+			var testArray = [1, 2, 3];
+			var result = splice(testArray, 1, 0);
+			eq( JSON.stringify([]), JSON.stringify(result) );
+			eq( JSON.stringify([1, 2, 3]), JSON.stringify(testArray) );
+		},
+		// If start < 0 and no deleteCount, delete all elements from index 0 to end of the array.
+		'If start < 0 and no deleteCount, delete all elements from index 0 to end of the array.': function() {
+			//fail();
+			var testArray = [1, 2, 3];
+			var result = splice(testArray, -5);
+			eq( JSON.stringify([]), JSON.stringify(testArray) );
+			eq( JSON.stringify([1, 2, 3]), JSON.stringify(result) );
+		},
+		// The returned array should contain all the deleted elements. *** Maybe remove all other results from every other test until you get here? ***
+		'The returned array should contain all the deleted elements.': function() {
+			//fail();
+			var testArray = [1, 2, 3, undefined, 4, undefined, 6, 7, 8];
+			var result = splice(testArray, 2, 5);
+			eq( JSON.stringify([3, undefined, 4, undefined, 6]), JSON.stringify(result) );
+			eq( JSON.stringify([1, 2, 7, 8]), JSON.stringify(testArray) );
+		},
+		// If addItem and no deleteCount, add the item at the starting index.
+		'If addItem and no deleteCout, add the item at the starting index.': function() {
+			//fail();
+			// Test 1:
+			var testArray1 = [1, 2, 3];
+			var result1 = splice(testArray1, 1, 0, 77, 52, 43, 55, '77again');
+			eq( JSON.stringify([1, 77, 52, 43, 55, '77again', 2, 3]), JSON.stringify(testArray1) );
+			eq(0, result1.length);
+
+			// Test 2:
+			var testArray2 = ['angel', 'clown', 'mandarin', 'sturgeon'];
+			var result2 = splice(testArray2, 2, 0, 'drum');
+			eq( JSON.stringify(['angel', 'clown', 'drum', 'mandarin', 'sturgeon']), JSON.stringify(testArray2) );
+			eq(0, result2.length);
+		},
+		// If addItem and deleteCount, remove the elements at start and include addItem at start.
+		'If addItem and deleteCount, remove the elements at start and include addItem at start.': function() {
+			//fail();
+			var testArray = [1, 2, 3, 4];
+			var result = splice(testArray, 1, 2, 77, 52, 43, 55, '77again');
+			eq( JSON.stringify([1, 77, 52, 43, 55, '77again', 4]), JSON.stringify(testArray) );
+			eq( JSON.stringify([2, 3]), JSON.stringify(result) );
+		},
+		// addItem can take a variable number of arguments.
+		'addItem can take a variable number of arguments.': function() {
+			//fail();
+			var testArray = [1, 2, 3];
+			splice(testArray, 1, 0, 77, 52, 43, 55, '77again', {name: 'al', age: 27});
+			eq( JSON.stringify([1, 77, 52, 43, 55, '77again', {name: 'al', age: 27}, 2, 3]), JSON.stringify(testArray) );
+		},
+		// If addItem and start > array.length, add the item at array.length.
+		'If addItem and start > array.length, add the item at array.length.': function() {
+			//fail();
+			var testArray = [1, 2, 3];
+			splice(testArray, 50, 0, 4);
+			eq( JSON.stringify([1, 2, 3, 4]), JSON.stringify(testArray) );
+		},
+		// It should not exclude holes.
+		'It should not exclude holes.': function() {
+			//fail();
+			var testArray = [1, 2, 3, , 4, , 5];
+			var result = splice(testArray, 2);
+			eq( JSON.stringify([1, 2]), JSON.stringify(testArray) );
+			eq( JSON.stringify([3, , 4, , 5]), JSON.stringify(result) );
+		},
+		// It should splice an array of strings.
+		'It should splice an array of strings.': function() {
+			//fail();
+			var testArray = ['a', 'b', 'c', 'd', 'e'];
+			var result = splice(testArray, 1, 2);
+			eq( JSON.stringify(['a', 'd', 'e']), JSON.stringify(testArray) );
+			eq( JSON.stringify(['b', 'c']), JSON.stringify(result) );
+		},
+		// It should splice an array of objects.
+		'It should splice an array of objects.': function() {
+			//fail();
+			var testArray = [{name: 'al', last: 'doe'}, {name: 'steve', last: 'wils'}, {name: 'matt', last: 'p'}, {name: 'james', last: 'john'}, {name: 'jonni', last:'ref'}];
+			var result = splice(testArray, 3);
+			eq( JSON.stringify([{name: 'al', last: 'doe'}, {name: 'steve', last: 'wils'}, {name: 'matt', last: 'p'}]), JSON.stringify(testArray) );
+			eq( JSON.stringify([{name: 'james', last: 'john'}, {name: 'jonni', last:'ref'}]), JSON.stringify(result) );
+		}
+});
+</script>

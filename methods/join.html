@@ -26,13 +26,18 @@
 
 function join(array, separator) {
 	var joinStr = "";
-	var joinArray = array.slice(0);
+	var joinArray = [];
 
 	if (!Array.isArray(array)) {
 		throw new TypeError(array + " is not an array.");
 	}
 
-	if (arguments.length === 1 || separator === undefined) {
+	for (var i = 0; i < array.length; i++) {
+		joinArray[i] = array[i];
+	}
+
+	if (separator === undefined) { // If omitted, or explicitly equal to undefined, this check satisfies both conditions.
+	// if (arguments.length === 1 || separator === undefined) {
 		separator = ",";
 	} else {
 		// Concatenating a number to a string will convert the number to a string.
