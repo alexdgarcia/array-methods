@@ -20,12 +20,12 @@
 	// Prototype:
 	function slice(array, begin, end) {
 		var sliceArray = [];
-		var startingIndex = 0;
-		var length = array.length;
 		var counter = 0;
+		var length = array.length;
+		var startingIndex = 0;
 
-		if (!Array.isArray(array)) {
-			throw new TypeError(`${array} is not an array.`);
+		if (typeof array !== 'object') {
+			throw new TypeError(`${array} is not an array-like object.`);
 		}
 
 		if (typeof begin === "number") {
@@ -33,13 +33,16 @@
 		}
 
 		if (typeof end === "number") {
-			length = end < 0 ? length + end : end;
+			length = end < 0 ? length + end : 
+			  end > length ? length: end;
 		}
 
 		for (let i = startingIndex; i < length; i++) {
 			// this is the only way to get "empty" for indexes with holes, instead of "undefined".
 			if (i in array) {
 				sliceArray[counter] = array[i];
+			} else {
+				sliceArray.length++;
 			}
 
 			counter++;
@@ -50,19 +53,19 @@
 
 	// Requirements:
 tests({
-	// It should only accept an array as the first argument.
-	'It should only accept an array as the first argument.': function() {
-		//fail();
-		var isTypeError = false;
+	// It should only accept an array as the first argument. <------ refactor this so that it only accepts arrays or array-like objs
+	// 'It should only accept an array as the first argument.': function() {
+	// 	//fail();
+	// 	var isTypeError = false;
 
-		try {
-			slice("string");
-		} catch(e) {
-			isTypeError = e instanceof TypeError;
-		}
+	// 	try {
+	// 		slice("string");
+	// 	} catch(e) {
+	// 		isTypeError = e instanceof TypeError;
+	// 	}
 
-		eq(true, isTypeError);
-	},
+	// 	eq(true, isTypeError);
+	// },
 	// It should return an array that is different from the array passed in.
 	'It should return an array that is different from the array passed in.': function() {
 		//fail();
@@ -165,6 +168,186 @@ tests({
 		eq(false, 3 in sliceArray);
 		eq(false, 4 in sliceArray);
 		eq(false, 5 in sliceArray);
+	},
+	// It should accept array-like objects.
+	'It should accept array-like objects.': function() {
+		//fail();
+		var isTypeError = false;
+
+		try {
+			var arrayLikeObj = {
+				0: 'arsenal',
+				1: 'football',
+				2: 'club',
+				length: 3
+			};
+
+			slice(arrayLikeObj, 0);
+		} catch(e) {
+			isTypeError = true;
+		}
+
+		eq(false, isTypeError);
+	},
+	// It should throw an error if passed something other than an array or array-like object.
+	'It should throw an error if passed something other than an array or array-like object.': function() {
+		var nonArrayLike = 12345;
+
+		try {
+			var isTypeError = false;
+			slice(nonArrayLike);
+		} catch(e) {
+			isTypeError = true;
+		}
+
+		eq(true, isTypeError);
+	},
+	// It should convert array-like objects to a new Array.
+	'It should convert array-like objects to a new Array.': function() {
+		//fail();
+		var arrayLikeObj = {
+			0: 'arsenal',
+			1: 'football',
+			2: 'club',
+			length: 3
+		}
+
+		var result = slice(arrayLikeObj, 0);
+		eq(JSON.stringify(['arsenal', 'football', 'club']), JSON.stringify(result));
+	},
+	// If the length of an array-like is less than the amount of indexed properties, return an array up to the length.
+	'If the length of an array-like is less than the amount of indexed properties, return an array up to the length.': function() {
+		//fail();
+		var arrayLikeObj = {
+			0: 0,
+			1: 1,
+			2: 2,
+			3: 3,
+			4: 4,
+			5: 5,
+			6: 6,
+			length: 3
+		}
+
+		var result = slice(arrayLikeObj, 0);
+
+		eq(3, result.length);
+		eq(JSON.stringify([0, 1, 2]), JSON.stringify(result));
+	},
+	// If slice is called on an array-like object with no length property, return an empty array.
+	'If slice is called on an array-like object with no length property, return an empty array.': function() {
+		//fail();
+		var arrayLikeObj = {
+			0: 'arsenal',
+			1: 'football',
+			2: 'club',
+		}
+
+		var result = slice(arrayLikeObj, 0);
+
+		eq(0, result.length);
+		eq(JSON.stringify([]), JSON.stringify(result));
+	},
+	// If slice is called on an array-like object with a length property but no indexed keys, return an array with holes.
+	'If slice is called on an array-like object with a length property but no indexed keys, return an array with holes.': function() {
+		//fail();
+		var arrayLikeObj = {
+			a: 'a',
+			b: 'b',
+			c: 'c',
+			length: 3
+		}
+
+		var result = slice(arrayLikeObj, 0);
+
+		eq(3, result.length);
+		eq(false, 0 in result);
+		eq(false, 1 in result);
+		eq(false, 2 in result);
+		eq(JSON.stringify([,,,]), JSON.stringify(result));
+	},
+	// If slice is called on an object with some indexed properties and an equivalent length, return an array of the indexed properties.
+	'If slice is called on an object with some indexed properties and an equivalent length, return an array of the indexed properties.': function() {
+		//fail();
+		var arrayLikeObj = {
+			a: 0,
+			0: 1,
+			b: 2,
+			1: 3,
+			length: 2
+		}
+
+		var result = slice(arrayLikeObj, 0);
+
+		eq(2, result.length);
+		eq(JSON.stringify([1, 3]), JSON.stringify(result));
+	},
+	// If slice is called on an object with some indexed properties and an non-equivalent length, return an array of the indexed properties and holes, respectively.
+	'If slice is called on an object with some indexed properties and an non-equivalent length, return an array of the indexed properties and holes.': function() {
+		//fail();
+		var arrayLikeObj = {
+			a: 0,
+			0: 1,
+			b: 2,
+			1: 3,
+			length: 4
+		}
+
+		var result = slice(arrayLikeObj, 0);
+
+		eq(4, result.length);
+		eq(JSON.stringify([1, 3,,,]), JSON.stringify(result));
+	},
+	// If the indexed properties of the array-like object are in non-numerical order, return an array of elements at the correct indices.
+	'If the indexed properties of the array-like object are in non-numerical order, return an array of elements at the correct indices.': function() {
+		var arrayLikeObj = {
+			2: 'a',
+			0: 'b',
+			4: 'c',
+			1: 'd',
+			3: 'e',
+			length: 5
+		}
+
+		var result = slice(arrayLikeObj, 0);
+
+		eq(5, result.length);
+		eq(JSON.stringify(['b', 'd', 'a', 'e', 'c']), JSON.stringify(result));
+	},
+	// Array-like objects should also return an array between two indices, if begin and end are provided.
+	'Array-like objects should also return an array between two indices, if begin and end are provided.': function() {
+		//fail();
+		var arrayLikeObj = {
+			2: 'a',
+			0: 'b',
+			4: 'c',
+			1: 'd',
+			3: 'e',
+			length: 5
+		}
+
+		var result = slice(arrayLikeObj, 1, 4);
+
+		eq(3, result.length);
+		eq(JSON.stringify(['d', 'a', 'e']), JSON.stringify(result));
+	},
+	// If one of the array elements is an object, the array returned should reference that object.
+	'If one of the array elements is an object, the array returned should reference that object.': function() {
+		var car = {
+			make: 'Honda',
+			model: 'Civic',
+			year: 1999,
+			color: 'red'
+		};
+		var arr = [1, 2, car, 3];
+
+		var result = slice(arr);
+
+		eq(4, result.length);
+		eq(JSON.stringify(arr[2]), JSON.stringify(result[2]));
+		car.color = 'green';
+		eq(JSON.stringify(arr[2]), JSON.stringify(result[2]));
+		eq(car.color, result[2].color);
 	},
 });
 </script>

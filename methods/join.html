@@ -28,21 +28,15 @@ function join(array, separator) {
 	var joinStr = "";
 	var joinArray = [];
 
-	if (!Array.isArray(array)) {
-		throw new TypeError(array + " is not an array.");
+	if (typeof array !== "object") {
+		throw new TypeError(`${array} + " is not an arraylike object.`);
 	}
 
 	for (var i = 0; i < array.length; i++) {
 		joinArray[i] = array[i];
 	}
 
-	if (separator === undefined) { // If omitted, or explicitly equal to undefined, this check satisfies both conditions.
-	// if (arguments.length === 1 || separator === undefined) {
-		separator = ",";
-	} else {
-		// Concatenating a number to a string will convert the number to a string.
-		separator = "" + separator;
-	}
+	separator = separator === undefined ? "," : "" + separator;
 
 	for (var i = 0; i < joinArray.length; i++) {
 		if (joinArray[i] === undefined || joinArray[i] === null) {
@@ -163,6 +157,133 @@ tests({
  	'If separator === null, convert null to a string and use it to separate elements.': function() {
  		var result = join([1,2,3], null);
  		eq("1null2null3", result);
- 	}
+ 	},
+ 	// If an array-like object is passed with no separator, return a string of the indexed values separated by commas
+ 	'If an array-like object is passed with no separator, return a string of the indexed values separated by commas': function() {
+		//fail();
+		var arrLike = {
+			0: '0',
+			1: '1',
+			2: '2',
+			length: 3
+		}
+
+		var result = join(arrLike);
+		eq("0,1,2", result);
+	},
+	// If the object length prop is less than the amount of indexed props, only return up to the length.
+	'If the object length prop is less than the amount of indexed props, only return up to the length.': function() {
+		//fail();
+		var arrLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			3: 'd',
+			4: 'e',
+			length: 3
+		}
+
+		var result = join(arrLike);
+		eq("a,b,c", result);
+	},
+	// If join is calleds on an obj with no length prop, return an empty string.
+	'If join is calleds on an obj with no length prop, return an empty string.': function() {
+		//fail();
+		var arrLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c'
+		}
+
+		var result = join(arrLike);
+		eq("", result);
+	},
+	// If join is called with gaps between indexes and an equivalent length, return a string with holes.
+	'If join is called with gaps between indexes and an equivalent length, return a string with holes.': function() {
+		//fail();
+		var arrLike = {
+			0: 'a',
+			3: 'b',
+			4: 'c',
+			5: 'd',
+			7: 'e',
+			length: 8
+		}
+
+		var result = join(arrLike);
+		eq("a,,,b,c,d,,e", result);
+	},
+	// If called with gaps between indexes and an unequivalent length, return only up to the length, and holes where necessary.
+	'If called with gaps between indexes and an unequivalent length, return only up to the length, and holes where necessary.': function() {
+		//fail();
+		var arrLike = {
+			0: 'a',
+			3: 'b',
+			4: 'c',
+			5: 'd',
+			7: 'e',
+			length: 5
+		}
+
+		var result = join(arrLike);
+		eq("a,,,b,c", result);
+	},
+	// If the value of an indexed property is an obj, return a string representation of an object.
+	'If the value of an indexed property is an obj, return a string representation of an object.': function() {
+		//fail();
+		var car = {
+			make: 'Honda',
+			model: 'Civic',
+			year: 1991
+		};
+		var arrLike1 = {
+			0: 'a',
+			1: 'b',
+			2: car,
+			3: 'c',
+			length: 4
+		};
+
+		var result1 = join(arrLike1);
+		eq("a,b,[object Object],c", result1);
+	},
+	// If a separator is passed with an array-like obj, replace the commas with the separator
+	'If a separator is passed with an array-like obj, replace the commas with the separator.': function() {
+		//fail();
+		var arrLike1 = {
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			length: 3
+		}
+
+		var result1 = join(arrLike1, '--');
+		eq("a--b--c", result1);
+
+		var arrLike2 = {
+			1: 'a',
+			2: 'b',
+			3: 'c',
+			length: 3
+		}
+		var result2 = join(arrLike2, '--');
+		eq("--a--b", result2);
+
+		var car = {
+			make: 'Honda',
+			model: 'Civic',
+			year: 1991
+		};
+		var arrLike3 = {
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			length: 3
+		};
+		var result3 = join(arrLike3, JSON.stringify(car));
+		eq('a{"make":"Honda","model":"Civic","year":1991}b{"make":"Honda","model":"Civic","year":1991}c'
+, result3);
+	},
+
 });
 </script>

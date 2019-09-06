@@ -59,6 +59,7 @@ tests({
 	// It should run the callback array.length times.
 	'It should run the callback array.length times': function() {
 		//fail();
+		debugger;
 		var numOfTimesCallbackHasRun = 0;
 		every([1, 2, 3], function(currentElement, currentIndex, array) {
 			numOfTimesCallbackHasRun++;

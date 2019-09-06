@@ -19,13 +19,13 @@
 function pop(array) {
 	var lastElement = array[array.length - 1];
 
-	if ( !Array.isArray(array) ) {
+	if (typeof array !== "object") {
 		throw new TypeError(`${array} is not an array.`)
 	}
 
 	if (array.length > 0) {
-		delete lastElement; // this will delete the value at this index, but the index itself will still exist as an empty index.
-		array.length--; // This will remove the last item in the array, we can use this to handle our empty index.
+		delete array[array.length - 1]; // this will delete the value at this index, but the index itself will still exist as an empty index.
+		array.length--; // This will remove the last item in the array, we can use this to handle our empty index or just use it directly to completely eliminate an element without leaving behind an empty index.
 	}
 
 	return lastElement;
@@ -80,6 +80,158 @@ tests({
 			eq(1, result);
 			eq(0, testArray.length);
 			eq(JSON.stringify([]), JSON.stringify(testArray));
-		}
+		},
+		// It should return 'undefined' if called on an array-like with no length property.
+		'It should return "undefined" if called on an array-like with no length property.': function() {
+			//fail();
+			var arrayLike = {
+				0: 'a',
+				1: 'b',
+				2: 'c'
+			}
+			var result = pop(arrayLike);
+			eq(undefined, result);
+		},
+		// It should return "undefined" if called on an arrayLike with a length property of 0.
+		'It should return "undefined" if called on an arrayLike with a length property of 0.': function() {
+			//fail();
+			var arrayLike = {
+				0: 'a',
+				1: 'b',
+				2: 'c',
+				length: 0
+			}
+			var result = pop(arrayLike);
+			eq(undefined, result);
+
+			var arrayLike2 = {
+				length: 0
+			}
+			var result2 = pop(arrayLike2);
+			eq(undefined, result2);
+		},
+		// It should return the last element if called on a valid array-like object.
+		'It should return the last element if called on a valid array-like object.': function() {
+			//fail();
+			var arrayLike = {
+				0: 'a',
+				1: 'b',
+				2: 'c',
+				length: 3
+			}
+			var result = pop(arrayLike);
+			eq('c', result);
+		},
+		// It should decrement the length property if called on a valid array-like object.
+		'It should decrement the length property if called on a valid array-like object.': function() {
+			//fail();
+			var arrayLike = {
+				0: 'a',
+				1: 'b',
+				2: 'c',
+				length: 3
+			}
+			pop(arrayLike);
+			eq(2, arrayLike.length);	
+		},
+		// It should return the last element if passed an array-like with missing indexes but an equivalent length.
+		'It should return the last element if passed an array-like with missing indexes but an equivalent length.': function() {
+			//fail();
+			var arrayLike = {
+				0: 'a',
+				2: 'b',
+				4: 'c',
+				length: 5
+			}
+			var result = pop(arrayLike);
+			eq('c', result);
+			eq(4, arrayLike.length);
+		},
+		// It should return the expected element when passed an array-like with missing indexes, but an unequivalent length.
+		'It should return the expected element when passed an array-like with missing indexes, but an unequivalent length.': function() {
+			//fail();
+			arrayLike = {
+				0: 'a',
+				2: 'b',
+				4: 'c',
+				length: 3
+			}
+			
+			var result = pop(arrayLike);
+			eq('b', result);
+			eq(JSON.stringify({
+				0: 'a',
+				4: 'c',
+				length: 2
+			}), JSON.stringify(arrayLike));
+			eq(2, arrayLike.length);
+		},
+		// It should always return "undefined" if the length property refers to a non-existant index.
+		'It should always return "undefined" if the length property refers to a non-existant index.': function() {
+			//fail();
+			var arrayLike = {
+				0: 'a',
+				2: 'b',
+				4: 'c',
+				length: 2
+			}
+			var result = pop(arrayLike);
+			eq(undefined, result);
+		},
+		// It should decrement the length property if a non-existant index is processed.
+		'It should decrement the length property if a non-existant index is processed.': function() {
+			//fail();
+			var arrayLike = {
+				0: 'a',
+				2: 'b',
+				4: 'c',
+				length: 2
+			}
+			var result = pop(arrayLike);
+			eq(undefined, result);
+			eq(JSON.stringify({
+				0: 'a',
+				2: 'b',
+				4: 'c',
+				length: 1
+			}), JSON.stringify(arrayLike));
+		},
+		// It should return "null" if it processes a null value.
+		'It should return "null" if it processes a null value.': function() {
+			//fail();
+			var arrayLike = {
+				0: 'a',
+				1: null,
+				length: 2
+			}
+			var result = pop(arrayLike);
+			eq(null, result);
+			eq(JSON.stringify({
+				0: 'a',
+				length: 1
+			}), JSON.stringify(arrayLike));
+		},
+		// It should return an object if it processes an object as an indexed property.
+		'It should return an object if it processes an object as an indexed property.': function() {
+			//fail();
+			var car = {
+				make: 'Honda',
+				model: 'Civic',
+				year: 1999
+			}
+			var arrayLike = {
+				0: 'a',
+				1: 'b',
+				2: car,
+				length: 3
+			}
+			var result = pop(arrayLike);
+			eq(car, result);
+			eq(JSON.stringify({
+				0: 'a',
+				1: 'b',
+				length: 2
+			}), JSON.stringify(arrayLike));
+		},
 });
 </script>

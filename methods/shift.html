@@ -13,18 +13,24 @@
 		// If array.length === 0, return undefined.
 
 function shift(array) {
-	var shiftElement = array[0];
+	var shiftElement;
 
-	if ( !Array.isArray(array) ) {
+	if (typeof array !== 'object') {
 		throw new TypeError(`${array} is not an array.`);
+	} else if (array.length) {
+		array.length >= 1 ? shiftElement = array[0] : array.length = 0;
 	}
-	// delete shiftElement; <--- no need for this.
+	
 
-	for (var i = 0; i < array.length - 1; i++) {
-		array[i] = array[i + 1];
+	for (var i = 0; i < array.length; i++) {
+		if (i === array.length - 1) {
+			delete array[i];
+		} else {
+			array[i] = array[i + 1];
+		}
 	}
 
-	if (array.length === 0) {
+	if (array.length === 0 || !array.length) {
 		return shiftElement; // If array.length is 0, shiftElement will be undefined.
 	} else {
 		array.length--;
@@ -76,6 +82,200 @@ tests({
 		var result = shift(testArray);
 
 		eq(undefined, result);
-	}
+	},
+	// It should return "undefined" if called on an array-like with no length property.
+	'It should return "undefined" if called on an array-like with no length property.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c'
+		}
+		var result = shift(arrayLike);
+		eq(undefined, result);
+		eq(JSON.stringify({
+			0: 'a',
+			1: 'b',
+			2: 'c'
+		}), JSON.stringify(arrayLike));
+	},
+	// It should return undefined if called on an array-like with a length property of 0.
+	'It should return undefined if called on an array-like with a length property of 0.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			length: 0
+		}
+		var result = shift(arrayLike);
+		eq(undefined, result);
+		eq(JSON.stringify({
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			length: 0
+		}), JSON.stringify(arrayLike));
+	},
+	// It should return the element at the first index if called on a valid array-like.
+	'It should return the element at the first index if called on a valid array-like.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			length: 3
+		}
+		var result = shift(arrayLike);
+		eq('a', result);
+		eq(JSON.stringify({
+			0: 'b',
+			1: 'c',
+			length: 2
+		}), JSON.stringify(arrayLike));
+	},
+	// It should decrement the length if called on a valid array-like.
+	'It should decrement the length if called on a valid array-like.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			length: 3
+		}
+		shift(arrayLike);
+		eq(2, arrayLike.length);
+	},
+	// It should return "undefined" if called on a valid arrayLike without a 0th index.
+	'It should return "undefined" if called on a valid arrayLike without a 0th index.': function() {
+		//fail();
+		var arrayLike = {
+			1: 'a',
+			2: 'b',
+			length: 3
+		}
+		var result = shift(arrayLike);
+		eq(undefined, result);
+	},
+	// It should reorder the array-like's indexes after processing an object without a 0th index.
+	'It should reorder the array-like\'s indexes after processing an object without a 0th index.': function() {
+		//fail();
+		var arrayLike = {
+			1: 'a',
+			2: 'b',
+			length: 3
+		}
+		shift(arrayLike);
+		eq(JSON.stringify({
+			0: 'a',
+			1: 'b',
+			length: 2
+		}), JSON.stringify(arrayLike));
+	},
+	// It should only reorder indexes that are within the range of an array-like's length property.
+	'It should only reorder indexes that are within the range of an array-like\'s length property.': function() {
+		//fail();
+		var arrayLike = {
+			1: 'a',
+			2: 'b',
+			3: 'c',
+			length: 2
+		}
+		var result = shift(arrayLike);
+		eq(JSON.stringify({
+			0: 'a',
+			2: 'b',
+			3: 'c',
+			length: 1
+		}), JSON.stringify(arrayLike));
+		eq(undefined, result);
+	},
+	// It should return null if it processes a null value.
+	'It should return null if it processes a null value.': function() {
+		//fail();
+		var arrayLike = {
+			0: null,
+			1: 'a',
+			length: 2
+		}
+		var result = shift(arrayLike);
+		eq(null, result);
+		eq(JSON.stringify({
+			0: 'a',
+			length: 1
+		}), JSON.stringify(arrayLike));
+	},
+	// It should return "undefined" if called on an arrayLike with a negative length.
+	'It should return "undefined" if called on an arrayLike with a negative length.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			length: -1
+		}	
+		var result = shift(arrayLike);
+		eq(undefined, result);
+	},
+	// It should set the length property to zero if called on an arrayLike with a negative length.
+	'It should set the length property to zero if called on an arrayLike with a negative length.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			length: -1
+		}
+		shift(arrayLike);
+		eq(0, arrayLike.length);
+		eq(JSON.stringify({
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			length: 0
+		}), JSON.stringify(arrayLike));
+
+		var arrayLike2 = {
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			length: -100
+		}
+		shift(arrayLike2);
+		eq(0, arrayLike2.length);
+		eq(JSON.stringify({
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			length: 0
+		}), JSON.stringify(arrayLike2));		
+	},
+	// The length property of the arrayLike should never be less than 0 if the shift is called several times.
+	'The length property of an arrayLike with a length < 0 or zero should never be anything other than 0 if shift is called several times.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			length: -100
+		}
+		shift(arrayLike);
+		shift(arrayLike);
+		shift(arrayLike);
+		shift(arrayLike);
+		eq(0, arrayLike.length);
+
+		var arrayLike2 = {
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			length: 0
+		}
+		shift(arrayLike2);
+		shift(arrayLike2);
+		shift(arrayLike2);
+		shift(arrayLike2);
+		eq(0, arrayLike2.length);
+	},
 });
 </script>

@@ -19,19 +19,19 @@
 		// It should return the new length of the array.
 
 function unshift() {
-	var argsLength = arguments.length - 1;
-	var length = arguments[0].length - 1;
-	var threshhold;
+	var argsLength, length, threshhold;
 
-	if ( !Array.isArray(arguments[0]) ) {
+	if (typeof arguments[0] !== "object") {
 		throw new TypeError(`${arguments[0]} is not an array.`);
 	}
 
-	if (length === -1) {
-		threshhold = length;
-	} else {
-		threshhold = 0;
+	if (!arguments[0].length || arguments[0].length < 0) {
+		arguments[0].length = 0;
 	}
+
+	argsLength = arguments.length - 1;
+	length = arguments[0].length - 1;
+	threshhold = length === -1 ? length : 0;
 
 	// No need to do the below. The original array that sits outside this function can be accessed and changed from within the function. You just have to target the specific indexes of the array and modify them.
 	// The work below is a little overkill. I refactored the code by iterating backwards through the array.
@@ -56,6 +56,9 @@ function unshift() {
 		if (i === threshhold) {
 			for (var j = 0; j < argsLength; j++) {
 				arguments[0][j] = arguments[j + 1];
+				if ( !Array.isArray(arguments[0]) ) {
+					arguments[0].length++;
+				}
 			}
 		}
 	}
@@ -141,7 +144,7 @@ tests({
 	'It should return the new length of the array.': function() {
 		//fail();
 		var testArray = [1, 2, 3];
-		var result = unshift([1, 2, 3], 1, 1, 1);
+		var result = unshift(testArray, 1, 1, 1);
 		eq(6, result);
 	},
 	// If empty array, add elementN to the array and return new length.
@@ -172,6 +175,233 @@ tests({
 		var result4 = unshift(testArray4, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6);
 		eq(12, result4);
 		eq( JSON.stringify([1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6]), JSON.stringify(testArray4) );
-	}
+	},
+	// It should not throw an error if processing an array-like object.
+	'It should not throw an error if processing an array-like object.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			length: 2
+		}
+		var isTypeError = false;
+		try {
+			unshift(arrayLike);
+		} catch (e) {
+			isTypeError = true;
+		}
+		eq(false, isTypeError);
+
+		var arrayLike2 = function() { };
+		var isTypeError2 = false;
+		try {
+			unshift(arrayLike2);
+		} catch (e) {
+			isTypeError2 = true;
+		}
+		eq(true, isTypeError2);
+	},
+	// It should return the length of the arguments passed if an array-like does not have a length property.
+	'It should return the length of the arguments passed if an array-like does not have a length property.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c'
+		}
+		var result = unshift(arrayLike, 'd', 'e', 'f', 'g');
+		eq(4, result);
+	},
+	// It should set the new length if called on an array-like with no length property.
+	'It should set the new length if called on an array-like with no length property.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c'
+		}
+		var result = unshift(arrayLike, 'd', 'e', 'f', 'g');
+		eq(4, result);
+		eq(JSON.stringify({
+			0: 'd',
+			1: 'e',
+			2: 'f',
+			3: 'g',
+			length: 4
+		}), JSON.stringify(arrayLike));
+	},
+	// It should return zero if the array-like has no length and elements to unshift are not passed.
+	'It should return zero if the array-like has no length and elements to unshift are not passed.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c'
+		}
+		var result = unshift(arrayLike);
+		eq(0, result);
+		eq(JSON.stringify({
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			length: 0
+		}), JSON.stringify(arrayLike));
+	},
+	// It should overwrite old indexed properties if called on an array-like with no length property.
+	'It should overwrite old indexed properties if called on an array-like with no length property.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c'
+		}
+		unshift(arrayLike, 'd', 'e', 'f', 'g');
+		eq(JSON.stringify({
+			0: 'd',
+			1: 'e',
+			2: 'f',
+			3: 'g',
+			length: 4
+		}), JSON.stringify(arrayLike));
+	},
+	// It should return the length of the arguments passed if called on an array-like with a length property of zero.
+	'It should return the length of the arguments passed if called on an array-like with a length property of zero.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			length: 0
+		}
+		var result = unshift(arrayLike, 'd', 'e');
+		eq(2, result);
+
+		var arrayLike2 = {
+			0: 'a',
+			1: 'b',
+			length: 0
+		}
+		var result2 = unshift(arrayLike2);
+		eq(0, result2);
+	},
+	// It should set the new length if called on an array-like with a length property <== 0.
+	'It should set the new length if called on an array-like with a length property <== 0.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			length: 0
+		}
+		var result = unshift(arrayLike, 'd', 'e', 'f', 'g');
+		eq(4, result);
+		eq(4, arrayLike.length);
+
+		var arrayLike2 = {
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			length: -1
+		}
+		var result2 = unshift(arrayLike2, 'd');
+		eq(1, arrayLike2.length);
+	},
+	// It should overwrite old indexed properties and add new ones as necessary.
+	'It should overwrite old indexed properties and add new ones as necessary.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			length: 0
+		}
+		var result = unshift(arrayLike, 'd', 'e', 'f', 'g');
+		eq(JSON.stringify({
+			0: 'd',
+			1: 'e',
+			2: 'f',
+			3: 'g',
+			length: 4
+		}), JSON.stringify(arrayLike));
+
+		var arrayLike2 = {
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			length: -1
+		}
+		var result2 = unshift(arrayLike2, 'd');
+		eq(1, result2);
+		eq(JSON.stringify({
+			0: 'd',
+			1: 'b',
+			2: 'c',
+			length: 1
+		}), JSON.stringify(arrayLike2));
+	},
+	// It should return the new length if called on a valid array-like object.
+	'It should return the new length if called on a valid array-like object.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			length: 2
+		}
+		var result = unshift(arrayLike, 'd');
+		eq(3, result);
+
+		var arrayLike2 = {
+			0: 'a',
+			1: 'b',
+			length: 2
+		}
+		var result2 = unshift(arrayLike2, 'd', 'e', 'f');
+		eq(5, result2);
+	},
+	// It should unshift the passed elements and maintain the original elements if called on a valid array-like.
+	'It should unshift the passed elements and maintain the original elements if called on a valid array-like.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			length: 2
+		}
+		unshift(arrayLike, 'd');
+		eq('d', arrayLike[0]);
+		eq('a', arrayLike[1]);
+		eq('b', arrayLike[2]);
+	},
+	// It should skip holes if called on an array with a length equivalent to its indexed properties.
+	'It should skip holes if called on an array with a length equivalent to its indexed properties.': function() {
+		//fail();
+		var arrayLike = {
+			1: 'b',
+			2: 'c',
+			length: 3
+		}
+		var result = unshift(arrayLike, 'd', 'e');
+		eq(5, result);
+		eq(JSON.stringify({
+			0: 'd',
+			1: 'e',
+			3: 'b',
+			4: 'c',
+			length: 5
+		}), JSON.stringify(arrayLike));
+	},
+	// It should overwrite elements outside the range of the length property.
+	'It should overwrite elements outside the range of the length property.': function() {
+		var arrayLike = {
+			1: 'b',
+		    2: 'c',
+		    length: 2
+	    }
+	    var result = unshift(arrayLike, 'd', 'e');
+	    eq(4, result);
+	    eq(JSON.stringify({
+	    	0: 'd',
+	    	1: 'e',
+	    	3: 'b',
+	    	length: 4
+	    }), JSON.stringify(arrayLike));
+	},
+	
 });
 </script>

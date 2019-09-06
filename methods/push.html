@@ -19,12 +19,20 @@
 		// If empty array && no elementN, return 0.
 
 function push(array) {
-	if ( !Array.isArray(array) ) {
-		throw new TypeError(`${array} + is not an array.`);
+	if (typeof array !== 'object') {
+		throw new TypeError(`${array} is not an arrayLike.`);
 	}
 
 	for (var i = 1; i < arguments.length; i++) {
+		if (!array.length) {
+			array.length = 0;
+		}
+
 		array[array.length] = arguments[i];
+
+		if ( !Array.isArray(array) ) {
+		  array.length++;
+		}
 	}
 
 	return array.length;
@@ -118,9 +126,156 @@ tests({
 	'If empty array && no elementN, return 0.': function() {
 		//fail();
 		var testArray = [];
-		var result = (testArray);
+		var result = push(testArray);
 		eq(0, result);
 	},
+	// It should accept an arrayLike object as the first argument.
+	'It should accept an arrayLike object as the first argument.': function() {
+		//fail();
+		var isTypeError1 = false;
+		var arrayLike = {
+			length: 0
+		};
+		try {
+			push(arrayLike);
+		} catch (e) {
+			isTypeError1 = true;
+		}
+		eq(false, isTypeError1);
+
+		var isTypeError2 = false;
+		var nonArrayLike = '1234';
+		try {
+			push(nonArrayLike);
+		} catch (e) {
+			isTypeError2 = true;
+		}
+		eq(true, isTypeError2);
+
+		var isTypeError3 = false;
+		var nonArrayLike2 = 1234;
+		try {
+			push(nonArrayLike);
+		} catch (e) {
+			isTypeError3 = true;
+		}
+		eq(true, isTypeError3);
+	},
+	// It should return 0 if passed an arrayLike with no indexed properties and a length of 0.
+	'It should return 0 if passed an arrayLike with no indexed properties and a length of 0.': function() {
+		//fail();
+		var arrayLike = {
+			length: 0
+		};
+		var result = push(arrayLike);
+		eq(0, result);
+	},
+	// It should assign new properties to an object with with no indexed properties and a length property.
+	'It should assign new properties to an object with with no indexed properties and a length property.': function() {
+		//fail();
+		var arrLike = {
+			length: 4
+		}
+		push(arrLike, 'a', 'b', 'c');
+		eq(JSON.stringify({
+			4: 'a',
+			5: 'b',
+			6: 'c',
+			length: 7
+		}), JSON.stringify(arrLike));
+	},
+	// It should return the new length if passed an arrayLike with indexed properties and an equivalent length.
+	'It should return the new length if passed an arrayLike with indexed properties and an equivalent length.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			length: 3
+		}
+		var result = push(arrayLike, 'd');
+		eq(4, result);
+
+		var arrayLike2 = {
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			length: 3
+		}
+		var result2 = push(arrayLike2, 'd', 'e', 'f', 'g');
+		eq(7, result2);
+	},
+	// It should modify the arrayLike object to have the newly pushed elements as indexed properties.
+	'It should modify the arrayLike object to have the newly pushed elements as indexed properties.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			length: 3
+		}
+		push(arrayLike, 'd', 'e', 'f', 'g');
+		eq(JSON.stringify({
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			3: 'd',
+			4: 'e',
+			5: 'f',
+			6: 'g',
+			length: 7
+		}), JSON.stringify(arrayLike));
+	},
+	// It should return the new length if an object is passed with indexed properties but no length.
+	'It should return the new length if an object is passed with indexed properties but no length.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c'
+		}
+		var result = push(arrayLike, 'd');
+		eq(1, result);
+
+		var arrayLike2 = {
+			0: 'a',
+			1: 'b',
+			2: 'c'
+		}
+		var result2 = push(arrayLike2, 'd', 'e', 'f', 'g');
+		eq(4, result2);
+	},
+	// It should rewrite the indexed properties of an object with no length property.
+	'It should rewrite the indexed properties of an object with no length property.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c'
+		}
+		push(arrayLike, 'd');
+		eq(JSON.stringify({
+			0: 'd',
+			1: 'b',
+			2: 'c',
+			length: 1
+		}), JSON.stringify(arrayLike));
+
+		var arrayLike2 = {
+			0: 'a',
+			1: 'b',
+			2: 'c'
+		}
+		push(arrayLike2, 'd', 'e', 'f', 'g');
+		eq(JSON.stringify({
+			0: 'd',
+			1: 'e',
+			2: 'f',
+			3: 'g',
+			length: 4
+		}), JSON.stringify(arrayLike2));
+	},
+	//
 });
 
 </script>
