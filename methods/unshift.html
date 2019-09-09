@@ -368,8 +368,8 @@ tests({
 		eq('a', arrayLike[1]);
 		eq('b', arrayLike[2]);
 	},
-	// It should skip holes if called on an array with a length equivalent to its indexed properties.
-	'It should skip holes if called on an array with a length equivalent to its indexed properties.': function() {
+	// It should skip "holes" if called on an array with a length equivalent to its indexed properties.
+	'It should skip "holes" if called on an array with a length equivalent to its indexed properties.': function() {
 		//fail();
 		var arrayLike = {
 			1: 'b',
@@ -402,6 +402,63 @@ tests({
 	    	length: 4
 	    }), JSON.stringify(arrayLike));
 	},
-	
+	// It should skip "holes" if called on an array-like with a length greater than its indexed properties.
+	'It should skip "holes" if called on an array-like with a length greater than its indexed properties.': function() {
+		//fail();
+		var arrayLike = {
+			1: 'b',
+			2: 'c',
+			length: 5
+		}
+		unshift(arrayLike, 'd', 'e');
+		eq(JSON.stringify({
+			0: 'd',
+			1: 'e',
+			3: 'b',
+			4: 'c',
+			length: 7
+		}), JSON.stringify(arrayLike));
+	},
+	// It should unshift objects onto array-likes.
+	'It should unshift objects onto array-likes.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			length: 2
+		}
+		var car = {
+			make: 'Honda',
+			model: 'Civic',
+			year: 1000
+		}
+		unshift(arrayLike, car, 'c');
+		eq(car, arrayLike[0]);
+		eq(4, arrayLike.length); 
+	},
+	// It should unshift null values.
+	'It should unshift null values.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			length: 2
+		}
+		unshift(arrayLike, null);
+		eq(null, arrayLike[0]);
+		eq(3, arrayLike.length);
+	},
+	// It should unshift undefined values.
+	'It should unshift undefined values.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			length: 2
+		}
+		unshift(arrayLike, undefined);
+		eq(undefined, arrayLike[0]);
+		eq(3, arrayLike.length);
+	},
 });
 </script>
