@@ -26,7 +26,7 @@
 	// It should return the modified array.
 
 function fill(array, value, start, end) {
-	if ( !Array.isArray(array) ) {
+	if ( typeof array !== 'object' ) {
 		throw new TypeError(`${array} is not an array`);
 	}
 
@@ -178,6 +178,155 @@ tests({
 		var result2 = fill(testArray2, 0, 3);
 		
 		eq( JSON.stringify([1, 1, , 0, 0]), JSON.stringify(result2) );
-	}
+	},
+	// It should process array-like objects.
+	'It should process array-like objects.': function() {
+		//fail();
+		var isTypeError = false;
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			length: 2
+		}
+
+		try {
+			fill(arrayLike, 'z');
+		} catch(e) {
+			isTypeError = true;
+		}
+		eq(false, isTypeError);
+	},
+	// It should overwrite all elements of an array-like if called with no start or end.
+	'It should overwrite all elements of an array-like if called with no start or end.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			length: 3
+		}
+		fill(arrayLike, 'z');
+		eq(JSON.stringify({
+			0: 'z',
+			1: 'z',
+			2: 'z',
+			length: 3
+		}), JSON.stringify(arrayLike));
+	},
+	// It should overwrite all elements of an array-like within a given range.
+	'It should overwrite all elements of an array-like within a given range.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			3: 'd',
+			length: 4
+		}
+		fill(arrayLike, 'z', 1, 3);
+		eq(JSON.stringify({
+			0: 'a',
+			1: 'z',
+			2: 'z',
+			3: 'd',
+			length: 4
+		}), JSON.stringify(arrayLike));
+
+		var arrayLike2 = {
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			3: 'd',
+			length: 4
+		}
+		fill(arrayLike2, 'zzz', 1);
+		eq(JSON.stringify({
+			0: 'a',
+			1: 'zzz',
+			2: 'zzz',
+			3: 'zzz',
+			length: 4
+		}), JSON.stringify(arrayLike2));
+	},
+	// It should create indexed properties on array-like objects with a length but no indexes.
+	'It should create indexed properties on array-like objects with a length but no indexes.': function() {
+		//fail();
+		var arrayLike = {
+			'a': 1,
+			'b': 2,
+			length: 2
+		}
+		fill(arrayLike, 777);
+		eq(JSON.stringify({
+			0: 777,
+			1: 777,
+			'a': 1,
+			'b': 2,
+			length: 2
+		}), JSON.stringify(arrayLike));
+	},
+	// It should return the array-like as is if it has no length.
+	'It should return the array-like as is if it has no length.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b'
+		}
+		fill(arrayLike, 'z');
+		eq(JSON.stringify({
+			0: 'a',
+			1: 'b'
+		}), JSON.stringify(arrayLike));
+	},
+	// It should return the array-like as is if it has a length === 0.
+	'It should return the array-like as is if it has a length === 0.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			length: 0
+		}
+		fill(arrayLike, 'z');
+		eq(JSON.stringify({
+			0: 'a',
+			1: 'b',
+			length: 0
+		}), JSON.stringify(arrayLike));
+	},
+	// It should return the array-like as is if length < 0.
+	'It should return the array-like as is if length < 0.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			length: -3
+		}
+		fill(arrayLike, 'z');
+		eq(JSON.stringify({
+			0: 'a',
+			1: 'b',
+			length: -3
+		}), JSON.stringify(arrayLike));
+	},
+	// It should perform fill on holes.
+	'It should perform fill on holes.': function() {
+		//fail();
+		var arrayLike = {
+			1: 'a',
+			2: 'b',
+			5: 'c',
+			length: 6
+		}
+		fill(arrayLike, 'z', 0);
+		eq(JSON.stringify({
+			0: 'z',
+			1: 'z',
+			2: 'z',
+			3: 'z',
+			4: 'z',
+			5: 'z',
+			length: 6
+		}), JSON.stringify(arrayLike));
+	},
 });
 </script>
