@@ -18,7 +18,7 @@ function reverse(array) {
 	var trailingIndex = array.length - 1;
 	var element;
 	
-	if ( !Array.isArray(array) ) {
+	if ( typeof array !== 'object' ) {
 		throw new TypeError(`${array} is not an array.`);
 	}
 
@@ -105,6 +105,149 @@ tests({
 		var testArray = [[1, 2, 3], [4, 5, 6], [9, , 9]];
 		var result = reverse(testArray);
 		eq( JSON.stringify([[9, , 9], [4, 5, 6], [1, 2, 3]]), JSON.stringify(testArray) );
+	},
+	// It should process array-like objects.
+	'It should process array-like objects.': function() {
+		//fail();
+		var isTypeError = false;
+		var arrayLike = {
+			0: 'a',
+			length: 1
+		}
+
+		try {
+			reverse(arrayLike);
+		} catch(e) {
+			isTypeError = true;
+		}
+		eq(false, isTypeError);
+	},
+	// It should reverse a valid array-like object.
+	'It should reverse a valid array-like object.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			length: 3
+		}
+		reverse(arrayLike);
+		eq(JSON.stringify({
+			0: 'c',
+			1: 'b',
+			2: 'a',
+			length: 3
+		}), JSON.stringify(arrayLike));
+	},
+	// It should only reverse elements within a given range.
+	'It should only reverse elements within a given range.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			3: 'd',
+			length: 2
+		}
+		reverse(arrayLike);
+		eq(JSON.stringify({
+			0: 'b',
+			1: 'a',
+			2: 'c',
+			3: 'd',
+			length: 2
+		}), JSON.stringify(arrayLike));
+
+		var arrayLike2 = {
+			6: 'a',
+			7: 'b',
+			length: 2
+		}
+		reverse(arrayLike2);
+		eq(JSON.stringify({
+			6: 'a',
+			7: 'b',
+			length: 2
+		}), JSON.stringify(arrayLike2));
+	},
+	// It should inverse the order of where holes appear.
+	'It should inverse the order of where holes appear.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			2: 'c',
+			3: 'd',
+			length: 4
+		}
+		reverse(arrayLike);
+		eq(JSON.stringify({
+			0: 'd',
+			1: 'c',
+			3: 'a',
+			length: 4
+		}), JSON.stringify(arrayLike));
+	},
+	// If length is greater than the number of indexed elements, reindex the elements.
+	'If length is greater than the number of indexed elements, reindex the elements.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c',
+			length: 6
+		}
+		reverse(arrayLike);
+		eq(JSON.stringify({
+			3: 'c',
+			4: 'b',
+			5: 'a',
+			length: 6
+		}), JSON.stringify(arrayLike));
+	},
+	// It should return an array-like as is if it has no length property.
+	'It should return an array-like as is if it has no length property.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			2: 'c'
+		}
+		reverse(arrayLike);
+		eq(JSON.stringify({
+			0: 'a',
+			1: 'b',
+			2: 'c'
+		}), JSON.stringify(arrayLike));
+	},
+	// It should return an array-like as is if its length property is zero.
+	'It should return an array-like as is if its length property is zero.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			length: 0
+		}
+		reverse(arrayLike);
+		eq(JSON.stringify({
+			0: 'a',
+			1: 'b',
+			length: 0
+		}), JSON.stringify(arrayLike));
+	},
+	// It should return an array-like as is if its length property is less than zero.
+	'It should return an array-like as is if its length property is less than zero.': function() {
+		//fail();
+		var arrayLike = {
+			0: 'a',
+			1: 'b',
+			length: -3
+		}
+		reverse(arrayLike);
+		eq(JSON.stringify({
+			0: 'a',
+			1: 'b',
+			length: -3
+		}), JSON.stringify(arrayLike));
 	},
 });
 </script>
